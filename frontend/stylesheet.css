@@ -1,0 +1,349 @@
+*{
+    box-sizing: border-box;
+}
+body {
+    background: linear-gradient(to right, rgb(6, 25, 45), rgb(1, 3, 13));
+    color:gray;
+    font-family : Arial, Helvetica, sans-serif;
+    line-height: 1.3rem;
+
+
+}
+
+a{
+    text-decoration: none;
+}
+
+.container{
+    width: 1120px;
+    margin-inline: auto;
+
+}
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 1.8rem;
+}
+
+.logo{
+    color: rgba(187, 142, 65, 0.914);
+    font-family: 'Arial', Times, serif;
+    font-size: 30px;
+    font-weight: bold ; 
+    
+}
+
+.navigation{
+    display: flex;
+    
+    
+}
+
+.navigation a{
+    color :  gray;
+    padding: 0.5rem 0.75rem;
+}
+
+.navigation a:hover{
+    color: #bb8e41e9;
+    background:  rgb(6, 25, 45);
+}
+
+
+.navigation-right{
+    display: flex;
+    gap: 0.75rem;
+     
+}
+
+
+
+.btn-fill{
+    background-color:  rgba(187, 142, 65, 0.914);
+    color:  rgb(6, 25, 45);
+    padding: 9px;
+    border: 1px solid   rgba(187, 142, 65, 0.914);
+    border-radius:100px;
+    
+}
+
+.btn-fill:hover{
+    box-shadow: 1px 1px 20px  rgba(187, 142, 65, 0.914);
+ 
+}
+
+
+.head{
+    padding-top: 4rem;
+    color:  #bb8e41e9;
+    font-size: 12px;
+    font-weight: 100;
+    text-transform: uppercase;
+    padding-bottom: 1.7rem;
+}
+ 
+
+
+.slogan{
+    padding-bottom:2rem;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 2.9rem;
+}
+
+.gold{
+    color:#bb8e41e9;
+    font-style: italic;
+}
+
+.description{
+    font-size: medium;
+    font-weight: 100;
+    padding-bottom: 2rem;
+}
+
+.btn-catalogue {
+
+        background: #bb8e41e9;
+        color: rgb(6, 25, 45);
+        margin-bottom: 4rem;
+
+
+}
+
+.surtitle{
+    color:#bb8e41e9;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+}
+
+
+
+
+.watch-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap : 1.5rem;
+}
+.watch {
+    width: 356px;
+    height: 550px;
+    border: 1px solid   rgb(2, 37, 74);
+    background: linear-gradient(to right, rgb(2, 37, 74), rgb(1, 3, 13));
+    border-radius: 1rem;
+    box-shadow: 1px 1px 20px  rgb(2, 37, 74);
+    flex: 1 1 300px;
+    
+}
+
+.watch:hover{
+    border: 1px solid   rgba(187, 142, 65, 0.914);
+    box-shadow: 1px 1px 20px  rgba(187, 142, 65, 0.914);
+
+}
+
+.watch-img {
+    width: 100%;
+    height: auto;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+
+}
+
+.watch-body {
+    padding: 1.5rem;
+
+}
+
+
+.watch-brand {
+    color: rgba(187, 142, 65, 0.914) ;
+    font-weight: 200;
+    margin: 0 0 10px;
+}
+
+.watch-model{
+    font-weight: 700;
+    font-size: larger;
+    margin-bottom: 10px;
+}
+
+.watch-mecanism{
+    font-weight: 200;
+    font-size: small;
+    margin-bottom: 20px;
+
+}
+
+
+.watch-info{
+    display: flex;
+    justify-content: space-between;
+    text-decoration: none;
+}
+
+
+.watch-price{
+    color :rgba(187, 142, 65, 0.914) ;
+    font-size: larger;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-weight: bold;
+
+}
+
+
+.watch-detail{
+ 
+   color: gray;
+   text-decoration: none;
+   font-weight: 700;
+   font-size: medium;
+}
+
+
+.watch-detail:hover{
+    color: rgba(187, 142, 65, 0.914);
+ }
+
+
+ .footer{
+    margin-top: 80px;
+    border-top: solid 1px gray;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+ }
+
+ .search{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    align-items: center;
+    flex: 1 1 100%;
+ }
+
+
+.input{
+    padding: 12px;
+    width: 450px;
+    border: solid 1px rgb(2, 37, 74);
+    box-shadow: 1px 1px 20px  rgb(2, 37, 74);
+    border-radius: 100px;
+}
+
+.input:focus{
+    border-color: rgba(187, 142, 65, 0.914);
+    box-shadow: 1px 1px 20px  rgba(187, 142, 65, 0.914);
+    outline: none;
+
+}
+
+
+.filter a{
+    padding: 5px;
+    color: gray;
+    border: solid 1px grey;
+    border-radius: 1rem;
+
+}
+
+
+.filter a:hover{
+    border-color: rgba(187, 142, 65, 0.914);
+    box-shadow: 1px 1px 20px  rgba(187, 142, 65, 0.914);
+}
+
+.quantity{
+    padding-bottom: 12px;
+}
+
+
+.inventaire{
+    padding-top: 40px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex:1 1 100%;
+    padding-bottom: 2rem;
+}
+
+.box{
+    padding:2rem;
+    border: solid 1px grey;
+    border-radius: 1rem;
+    width: 400px;
+    background: rgb(6, 25, 45) ;
+}
+
+.admin{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+}
+
+.form{
+    background:  rgb(6, 25, 45) ;
+    border: solid 1px gray;
+    padding: 1rem;
+    border-radius: 1rem;
+    width: 400px;
+  
+
+}
+
+.form-watch{
+    padding-block: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-double{
+    display: flex;
+    padding-block: 20px;
+    gap: 24px;
+}
+
+.input-form{
+    padding: 12px;
+    background: rgb(0, 7, 14) ;
+    height: 35px;
+    outline: none;
+    border: solid 1px grey;
+    color: gray;
+    width: 100%;
+    border-radius: 40px;
+    font-size: medium;
+   
+ 
+}
+
+
+.input-form:focus{
+   border-color: rgba(187, 142, 65, 0.914) ;
+}
+
+
+.admin-table{
+    background:rgb(6, 25, 45) ;
+    border: solid 1px gray;
+    border-radius: 1rem;
+    padding: 20px;
+    flex: 1;
+}
+
+.marque{
+    color: rgba(187, 142, 65, 0.914) ;
+    text-transform: uppercase;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 100;
+}
+.modele{
+    font-weight: bold;
+}
+
