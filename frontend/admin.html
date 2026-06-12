@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration</title>
+    <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="logo">
+                WatchIQ
+            </a>
+            
+            <nav class="navigation">
+                <a href="accueil.html">Accueil</a>
+                <a href="catalogue.html">Catalogue</a>
+                <a href="versus.html">Versus</a>
+                <a href="admin.html">Administration</a>
+            </nav>
+            
+            <nav class="navigation-right">
+                <a class=btn-fill href ="#">Connexion</a>
+                <a class=btn-fill href="#">S'inscrire</a>
+            </nav>
+        </header>
+        
+        <div>
+            <div class ="head">espace d'administration</div>
+            <div class="slogan"> Gérer le catalogue</div>
+
+
+            <div class="inventaire">
+                <div class="box">
+                    <div class="gold">9</div>
+                    <div>MONTRES AU CATALOGUE</div>
+                </div>
+                <div class="box">
+                    <div class="gold">25</div>
+                    <div>MARQUES</div>
+                </div>
+                <div class="box">
+                    <div class="gold">25</div>
+                    <div>MARQUES</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="admin">
+
+            <div class="form">
+                <form action="admin.html">
+                    <div class="form-watch">
+                        <label for="brandinput">Marque</label>
+                        <input class="input-form" type="text" name="Marque" id="brandinput">
+                    </div>
+
+                    <div class="form-watch">
+                        <label for="modelinput">Modele</label>
+                        <input class="input-form"  type="text" name="Modele" id="modelinput">
+                    </div>
+
+                    <div class="form-watch">
+                        <label for="Refinput">Reference</label>
+                        <input  class="input-form" type="text" name="Reference" id="Refinput">
+                    </div>
+
+                    <div class="form-double">
+                        <div>
+                                <label for="prixinput">Prix</label>
+                                <input class="input-form" type="numeric" name="prix" id="prixinput"> 
+                        </div>
+
+                        <div>
+                                <label for="diametre-input">Diamétre</label>
+                                <input class="input-form" type="numeric" name="diametre" id="diametre-input"> 
+                        </div>
+
+                    </div>
+
+                    <div class="form-double">
+                        <div>
+                                <label for="categoryinput">Categorie</label>
+                                <input class="input-form" type="text" name="categorie" id="categoryinput"> 
+                        </div>
+
+                        <div>
+                                <label for="mvtinput">Mouvement</label>
+                                <input class="input-form" type="text" name="mouvement" id="mvtinput"> 
+                        </div>
+
+                    </div>
+
+                    <div class="form-watch">
+                        <label for="description-input">Description</label>
+                        <input class="input-form" type="text" name="Desription" id="description-input"> 
+                    </div>
+
+                    <div>
+                        <button  class="btn-fill">AJOUTER LA MONTRE</button>
+                    </div>
+
+
+                </form>
+
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Montre</th>
+                    <th>Référence</th>
+                    <th>Prix</th>
+                    <th></th> 
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="marque">Rolex</div>
+                      <div class="modele">Submariner Date</div>
+                    </td>
+                    <td>126610LN</td>
+                    <td>$ 10 900</td>
+                    <td>
+                      <button class="btn-fill">Modifier</button>
+                      <button class="btn-fill">Supprimer</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="marque">omega</div>
+                      <div class="modele">Speedmaster</div>
+                    </td>
+                    <td>126610LN</td>
+                    <td>$ 10 900</td>
+                    <td>
+                      <button  class="btn-fill">Modifier</button>
+                      <button  class="btn-fill" >Supprimer</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="marque">Patek philipe</div>
+                      <div class="modele">Nautilus</div>
+                    </td>
+                    <td>126610LN</td>
+                    <td>$ 10 900</td>
+                    <td>
+                      <button  class="btn-fill">Modifier</button>
+                      <button  class="btn-fill">Supprimer</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="marque">cartier</div>
+                      <div class="modele">Tank</div>
+                    </td>
+                    <td>126610LN</td>
+                    <td>$ 10 900</td>
+                    <td>
+                      <button  class="btn-fill">Modifier</button>
+                      <button  class="btn-fill">Supprimer</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="marque">tudor</div>
+                      <div class="modele">Black bay58</div>
+                    </td>
+                    <td>126610LN</td>
+                    <td>$ 10 900</td>
+                    <td>
+                      <button  class="btn-fill">Modifier</button>
+                      <button  class="btn-fill">Supprimer</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="marque">Rolex</div>
+                      <div class="modele">Daytona</div>
+                    </td>
+                    <td>126610LN</td>
+                    <td>$ 10 900</td>
+                    <td>
+                      <button class="btn-fill">Modifier</button>
+                      <button class="btn-fill">Supprimer</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+             
+
+        </div>
+    </div>
+    
+</body>
+</html>
