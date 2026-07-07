@@ -1,56 +1,62 @@
-import sqlite3
-from contextlib import contextmanager
+"""
+Configuration de la base de données avec SQLAlchemy (ORM).
 
-DATABASE = "watchvault.db"
+Rôle de ce fichier = la "plomberie" :
+  - engine        : la connexion physique à la base SQLite
+  - SessionLocal  : une "usine" qui fabrique des sessions (une conversation avec la base)
+  - Base          : la classe parente dont hériteront tous les modèles (voir models.py)
+  - get_db()      : la dépendance FastAPI qui ouvre/ferme une session par requête HTTP
+"""
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 
 
-def get_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row   # accès par nom : row["brand"]
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+# ── L'URL de connexion ────────────────────────────────────────────────────────
+# "sqlite:///watchvault.db" = un simple fichier watchvault.db dans ce dossier.
+# Pour passer à PostgreSQL plus tard, il suffira de changer CETTE ligne, par ex. :
+#   "postgresql+psycopg://user:mdp@localhost/watchvault"
+DATABASE_URL = "sqlite:///watchvault.db"
 
 
-@contextmanager
+# ── L'engine : le moteur de connexion ─────────────────────────────────────────
+# check_same_thread=False est spécifique à SQLite : FastAPI peut utiliser la base
+# depuis plusieurs threads, et SQLite l'interdit par défaut. On lève cette limite.
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+)
+
+
+# ── La fabrique de sessions ───────────────────────────────────────────────────
+# Une "session" est une conversation temporaire avec la base : on y ajoute,
+# lit, modifie des objets, puis on valide (commit) ou annule (rollback).
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+
+# ── La classe de base des modèles ─────────────────────────────────────────────
+# Tous les modèles (Watch, User…) hériteront de Base. C'est ce lien qui permet
+# à SQLAlchemy de connaître toutes les tables et de les créer.
+class Base(DeclarativeBase):
+    pass
+
+
+# ── La dépendance FastAPI ─────────────────────────────────────────────────────
+# On l'utilisera dans les routes avec Depends(get_db). FastAPI appelle cette
+# fonction à chaque requête : elle ouvre une session, la "prête" à la route
+# (yield), puis la ferme quoi qu'il arrive (finally). C'est le pattern standard.
 def get_db():
-    """Context manager : commit auto, rollback sur erreur, fermeture garantie."""
-    conn = get_connection()
+    db: Session = SessionLocal()
     try:
-        yield conn
-        conn.commit()
-    except Exception:
-        conn.rollback()
-        raise
+        yield db
     finally:
-        conn.close()
+        db.close()
 
 
+# ── Création des tables ───────────────────────────────────────────────────────
 def init_db():
-    """Crée les tables si elles n'existent pas encore."""
-    with get_db() as conn:
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS watches (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                brand         TEXT    NOT NULL,
-                model         TEXT    NOT NULL,
-                colorway      TEXT    NOT NULL,
-                bracelet      TEXT    NOT NULL,
-                reference     TEXT    NOT NULL UNIQUE,
-                category      TEXT    NOT NULL,
-                size_range    TEXT,
-                retail_price  REAL    NOT NULL,
-                resale_price  REAL,
-                release_year  INTEGER,
-                description   TEXT,
-                image_url     TEXT,
-                is_available  INTEGER NOT NULL DEFAULT 1
-            );
-
-            CREATE TABLE IF NOT EXISTS users (
-                id         INTEGER PRIMARY KEY AUTOINCREMENT,
-                username   TEXT    NOT NULL UNIQUE,
-                email      TEXT    NOT NULL UNIQUE,
-                password   TEXT    NOT NULL,
-                is_admin   INTEGER NOT NULL DEFAULT 0
-            );
-        """)
+    """Crée les tables décrites dans models.py si elles n'existent pas encore."""
+    # On importe models ICI (et pas en haut) pour éviter un import circulaire :
+    # models.py importe Base depuis ce fichier.
+    import models  # noqa: F401  (l'import enregistre les modèles sur Base)
+    Base.metadata.create_all(bind=engine)
