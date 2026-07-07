@@ -1,407 +1,93 @@
 """
-Seed script : initialise la base watchvault.db avec un catalogue de 25 montres.
+Import du dataset Kaggle "Luxury Watches Price" dans la base.
+
+On lit le CSV avec pandas (lecture + nettoyage), puis on insère chaque ligne
+comme un objet Watch via l'ORM SQLAlchemy.
 
 Usage :
-    python seed.py           # ajoute les montres si la référence n'existe pas
-    python seed.py --reset   # vide la table Watches puis réinsère tout
+    python seed.py           # vide la table watches puis réimporte tout le CSV
 """
 
+from pathlib import Path
 
-from database import get_db, init_db
+import pandas as pd
+from sqlalchemy import delete
 
-
-#init_db() : crée les tables si elles n'exi11
-# stent pas encore.
-init_db()
-WATCHES = [
-    {
-        "brand": "Rolex",
-        "model": "Submariner Date",
-        "colorway": "Black Dial / Black Bezel",
-        "bracelet": "Oyster Steel",
-        "reference": "126610LN",
-        "category": "Diver",
-        "size_range": "41mm",
-        "retail_price": 10900.0,
-        "resale_price": 14500.0,
-        "release_year": 2020,
-        "description": "Montre de plongée iconique, étanche jusqu'à 300m, mouvement Calibre 3235.",
-        "image_url": "https://content.rolex.com/dam/2023/upright-bba-with-shadow/m126610ln-0001.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Rolex",
-        "model": "Daytona",
-        "colorway": "White Dial / Steel",
-        "bracelet": "Oyster Steel",
-        "reference": "126500LN",
-        "category": "Chronograph",
-        "size_range": "40mm",
-        "retail_price": 15100.0,
-        "resale_price": 32000.0,
-        "release_year": 2023,
-        "description": "Chronographe de course légendaire avec lunette Cerachrom noire.",
-        "image_url": "https://content.rolex.com/dam/2023/upright-bba-with-shadow/m126500ln-0001.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Rolex",
-        "model": "GMT-Master II",
-        "colorway": "Pepsi - Red/Blue Bezel",
-        "bracelet": "Jubilee Steel",
-        "reference": "126710BLRO",
-        "category": "GMT",
-        "size_range": "40mm",
-        "retail_price": 11350.0,
-        "resale_price": 19500.0,
-        "release_year": 2018,
-        "description": "Deuxième fuseau horaire, lunette bicolore Cerachrom rouge et bleue.",
-        "image_url": "https://content.rolex.com/dam/2023/upright-bba-with-shadow/m126710blro-0002.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Omega",
-        "model": "Speedmaster Moonwatch",
-        "colorway": "Black Dial",
-        "bracelet": "Steel",
-        "reference": "310.30.42.50.01.002",
-        "category": "Chronograph",
-        "size_range": "42mm",
-        "retail_price": 7400.0,
-        "resale_price": 6800.0,
-        "release_year": 2021,
-        "description": "Le chronographe qui a été sur la Lune, mouvement Calibre 3861.",
-        "image_url": "https://www.omegawatches.com/media/catalog/product/o/m/omega-speedmaster-moonwatch.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Omega",
-        "model": "Seamaster Diver 300M",
-        "colorway": "Blue Wave Dial",
-        "bracelet": "Steel",
-        "reference": "210.30.42.20.03.001",
-        "category": "Diver",
-        "size_range": "42mm",
-        "retail_price": 5600.0,
-        "resale_price": 5200.0,
-        "release_year": 2018,
-        "description": "La montre de James Bond, cadran laqué bleu avec motif vagues.",
-        "image_url": "https://www.omegawatches.com/media/catalog/product/o/m/omega-seamaster-diver300m.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Audemars Piguet",
-        "model": "Royal Oak",
-        "colorway": "Blue Tapisserie Dial",
-        "bracelet": "Integrated Steel",
-        "reference": "15500ST.OO.1220ST.01",
-        "category": "Luxury Sport",
-        "size_range": "41mm",
-        "retail_price": 34400.0,
-        "resale_price": 58000.0,
-        "release_year": 2019,
-        "description": "Icône du design de Gerald Genta, lunette octogonale et bracelet intégré.",
-        "image_url": "https://www.audemarspiguet.com/content/dam/ap/com/royal-oak-15500ST.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Patek Philippe",
-        "model": "Nautilus",
-        "colorway": "Blue Gradient Dial",
-        "bracelet": "Integrated Steel",
-        "reference": "5711/1A-010",
-        "category": "Luxury Sport",
-        "size_range": "40mm",
-        "retail_price": 35000.0,
-        "resale_price": 140000.0,
-        "release_year": 2006,
-        "description": "Sport chic intemporel, discontinuée en 2021, extrêmement recherchée.",
-        "image_url": "https://www.patek.com/images/articles/face/large/5711_1A_010.png",
-        "is_available": 0,
-    },
-    {
-        "brand": "Patek Philippe",
-        "model": "Aquanaut",
-        "colorway": "Black Dial",
-        "bracelet": "Tropical Rubber",
-        "reference": "5167A-001",
-        "category": "Luxury Sport",
-        "size_range": "40mm",
-        "retail_price": 23000.0,
-        "resale_price": 55000.0,
-        "release_year": 2007,
-        "description": "Sport casual avec bracelet tropical composite breveté.",
-        "image_url": "https://www.patek.com/images/articles/face/large/5167A_001.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Tudor",
-        "model": "Black Bay 58",
-        "colorway": "Blue Dial",
-        "bracelet": "Steel",
-        "reference": "M79030B-0001",
-        "category": "Diver",
-        "size_range": "39mm",
-        "retail_price": 3900.0,
-        "resale_price": 3700.0,
-        "release_year": 2020,
-        "description": "Plongeuse vintage inspirée des années 50, format compact 39mm.",
-        "image_url": "https://www.tudorwatch.com/-/media/images/black-bay-58-blue.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Tudor",
-        "model": "Pelagos FXD",
-        "colorway": "Blue Dial / Titanium",
-        "bracelet": "Fabric Strap",
-        "reference": "M25717N-0001",
-        "category": "Diver",
-        "size_range": "42mm",
-        "retail_price": 4300.0,
-        "resale_price": 4100.0,
-        "release_year": 2021,
-        "description": "Plongeuse militaire en titane, développée avec la Marine Nationale.",
-        "image_url": "https://www.tudorwatch.com/-/media/images/pelagos-fxd.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Cartier",
-        "model": "Santos",
-        "colorway": "Silver Dial",
-        "bracelet": "Steel",
-        "reference": "WSSA0018",
-        "category": "Dress",
-        "size_range": "39.8mm",
-        "retail_price": 7700.0,
-        "resale_price": 7200.0,
-        "release_year": 2018,
-        "description": "Première montre-bracelet moderne, système QuickSwitch pour le bracelet.",
-        "image_url": "https://www.cartier.com/variants/images/santos-wssa0018.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Cartier",
-        "model": "Tank Must",
-        "colorway": "Silver Opaline Dial",
-        "bracelet": "Black Leather",
-        "reference": "WSTA0041",
-        "category": "Dress",
-        "size_range": "33.7mm",
-        "retail_price": 3050.0,
-        "resale_price": 2900.0,
-        "release_year": 2021,
-        "description": "Tank rectangulaire classique, élégance parisienne.",
-        "image_url": "https://www.cartier.com/variants/images/tank-must-wsta0041.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "IWC",
-        "model": "Pilot's Watch Mark XX",
-        "colorway": "Black Dial",
-        "bracelet": "Calfskin Leather",
-        "reference": "IW328201",
-        "category": "Pilot",
-        "size_range": "40mm",
-        "retail_price": 5250.0,
-        "resale_price": 4800.0,
-        "release_year": 2022,
-        "description": "Montre d'aviateur avec cadran lisible et mouvement Calibre 32111.",
-        "image_url": "https://www.iwc.com/content/dam/rcq/iwc/pilot-mark-xx.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "IWC",
-        "model": "Portugieser Chronograph",
-        "colorway": "Silver Dial / Blue Hands",
-        "bracelet": "Santoni Leather",
-        "reference": "IW371605",
-        "category": "Chronograph",
-        "size_range": "41mm",
-        "retail_price": 8400.0,
-        "resale_price": 7900.0,
-        "release_year": 2020,
-        "description": "Chronographe élégant d'inspiration marine, cadran argenté.",
-        "image_url": "https://www.iwc.com/content/dam/rcq/iwc/portugieser-chrono.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Breitling",
-        "model": "Navitimer B01 Chronograph",
-        "colorway": "Blue Dial",
-        "bracelet": "Steel",
-        "reference": "AB0138241C1A1",
-        "category": "Pilot",
-        "size_range": "43mm",
-        "retail_price": 9800.0,
-        "resale_price": 8500.0,
-        "release_year": 2022,
-        "description": "Chrono aviation mythique avec règle à calcul circulaire.",
-        "image_url": "https://www.breitling.com/media/image/navitimer-b01.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Breitling",
-        "model": "Superocean Heritage 57",
-        "colorway": "Black Dial",
-        "bracelet": "Mesh Steel",
-        "reference": "A10370A11B1A1",
-        "category": "Diver",
-        "size_range": "42mm",
-        "retail_price": 5200.0,
-        "resale_price": 4700.0,
-        "release_year": 2021,
-        "description": "Plongeuse rétro inspirée du modèle de 1957.",
-        "image_url": "https://www.breitling.com/media/image/superocean-heritage.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Grand Seiko",
-        "model": "Snowflake",
-        "colorway": "White Textured Dial",
-        "bracelet": "Titanium",
-        "reference": "SBGA211",
-        "category": "Dress",
-        "size_range": "41mm",
-        "retail_price": 6200.0,
-        "resale_price": 5800.0,
-        "release_year": 2017,
-        "description": "Cadran texturé évoquant la neige, mouvement Spring Drive haute précision.",
-        "image_url": "https://www.grand-seiko.com/assets/snowflake-sbga211.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Seiko",
-        "model": "Prospex SPB143",
-        "colorway": "Black Dial / Steel",
-        "bracelet": "Steel",
-        "reference": "SPB143J1",
-        "category": "Diver",
-        "size_range": "40.5mm",
-        "retail_price": 1300.0,
-        "resale_price": 1100.0,
-        "release_year": 2020,
-        "description": "Ré-édition moderne de la 62MAS, plongeuse de référence accessible.",
-        "image_url": "https://www.seikowatches.com/global-en/-/media/spb143j1.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Hublot",
-        "model": "Big Bang Unico",
-        "colorway": "Black Magic Ceramic",
-        "bracelet": "Rubber",
-        "reference": "441.CI.1170.RX",
-        "category": "Chronograph",
-        "size_range": "42mm",
-        "retail_price": 21000.0,
-        "resale_price": 18500.0,
-        "release_year": 2019,
-        "description": "Chronographe squelette en céramique noire, mouvement manufacture UNICO.",
-        "image_url": "https://www.hublot.com/sites/default/files/big-bang-unico.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Panerai",
-        "model": "Luminor Marina",
-        "colorway": "Black Dial",
-        "bracelet": "Leather",
-        "reference": "PAM01312",
-        "category": "Diver",
-        "size_range": "44mm",
-        "retail_price": 7900.0,
-        "resale_price": 7200.0,
-        "release_year": 2020,
-        "description": "Iconique couronne à pont-levis, luminescence maximale.",
-        "image_url": "https://www.panerai.com/content/dam/rcq/panerai/luminor-marina-pam01312.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Vacheron Constantin",
-        "model": "Overseas",
-        "colorway": "Blue Dial",
-        "bracelet": "Integrated Steel",
-        "reference": "4500V/110A-B128",
-        "category": "Luxury Sport",
-        "size_range": "41mm",
-        "retail_price": 25000.0,
-        "resale_price": 42000.0,
-        "release_year": 2016,
-        "description": "Troisième grande sport-chic suisse, bracelets interchangeables sans outil.",
-        "image_url": "https://www.vacheron-constantin.com/dam/rcq/vac/overseas-4500v.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Jaeger-LeCoultre",
-        "model": "Reverso Classic Medium",
-        "colorway": "Silver Dial",
-        "bracelet": "Leather",
-        "reference": "Q2548520",
-        "category": "Dress",
-        "size_range": "40.1x24.4mm",
-        "retail_price": 8300.0,
-        "resale_price": 7500.0,
-        "release_year": 2018,
-        "description": "Boîtier réversible Art Déco créé en 1931 pour les joueurs de polo.",
-        "image_url": "https://www.jaeger-lecoultre.com/content/reverso-classic-medium.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "TAG Heuer",
-        "model": "Carrera Chronograph",
-        "colorway": "Blue Dial / Glassbox",
-        "bracelet": "Steel",
-        "reference": "CBS2212.BA0013",
-        "category": "Chronograph",
-        "size_range": "39mm",
-        "retail_price": 6500.0,
-        "resale_price": 5800.0,
-        "release_year": 2023,
-        "description": "60e anniversaire, cadran panda bleu avec verre bombé glassbox.",
-        "image_url": "https://www.tagheuer.com/dam/carrera-cbs2212.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Zenith",
-        "model": "Chronomaster Sport",
-        "colorway": "White Dial",
-        "bracelet": "Steel",
-        "reference": "03.3100.3600/69.M3100",
-        "category": "Chronograph",
-        "size_range": "41mm",
-        "retail_price": 10900.0,
-        "resale_price": 11500.0,
-        "release_year": 2021,
-        "description": "Chronographe El Primero 1/10ème de seconde, lunette céramique noire.",
-        "image_url": "https://www.zenith-watches.com/content/chronomaster-sport.png",
-        "is_available": 1,
-    },
-    {
-        "brand": "Casio",
-        "model": "G-Shock GA-2100",
-        "colorway": "All Black 'CasiOak'",
-        "bracelet": "Resin",
-        "reference": "GA-2100-1A1",
-        "category": "Sport",
-        "size_range": "45.4mm",
-        "retail_price": 99.0,
-        "resale_price": 110.0,
-        "release_year": 2019,
-        "description": "Design octogonal abordable surnommé CasiOak, résistance aux chocs.",
-        "image_url": "https://www.casio.com/content/dam/ga-2100-1a1.png",
-        "is_available": 1,
-    },
-]
-
-#La requête SQL INSERT OR IGNORE : insère chaque sneaker dans la table. Le OR IGNORE évite les erreurs si une sneaker existe déjà (pas de doublons).
-sql = """
-    INSERT OR IGNORE INTO sneakers
-        (brand, model, colorway, bracelet, reference, category,
-         size_range, retail_price, resale_price, release_year, description, is_available)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-"""
+from database import SessionLocal, init_db
+from models import Watch
 
 
-#conn.executemany(sql, sneakers) : exécute la requête pour chaque sneaker de la liste d'un coup.
-with get_db() as conn:
-    conn.executemany(sql, WATCHES)
+# Chemin du CSV, calculé par rapport à CE fichier (marche peu importe d'où on lance).
+CSV_PATH = Path(__file__).parent / "data" / "luxury_watches.csv"
 
-print(f"{len(WATCHES)} sneakers insérées (ou ignorées si déjà présentes).")
+
+# Correspondance : colonne du CSV  ->  attribut du modèle Watch
+COLONNES = {
+    "Brand":              "brand",
+    "Model":              "model",
+    "Case Material":      "case_material",
+    "Strap Material":     "bracelet",
+    "Movement Type":      "movement",
+    "Water Resistance":   "water_resistance",
+    "Case Diameter (mm)": "diameter_mm",
+    "Case Thickness (mm)":"thickness_mm",
+    "Band Width (mm)":    "band_width_mm",
+    "Dial Color":         "dial_color",
+    "Crystal Material":   "crystal",
+    "Complications":      "complications",
+    "Power Reserve":      "power_reserve",
+    "Price (USD)":        "retail_price",
+}
+
+# Colonnes qui doivent devenir des nombres décimaux (float).
+COLONNES_NUM = ["diameter_mm", "thickness_mm", "band_width_mm", "retail_price"]
+
+
+def charger_csv() -> pd.DataFrame:
+    """Lit le CSV et le nettoie ; renvoie un DataFrame prêt à insérer."""
+    # utf-8-sig : gère le caractère invisible (BOM) au début du fichier.
+    df = pd.read_csv(CSV_PATH, encoding="utf-8-sig")
+
+    # 1) On ne garde que les colonnes connues et on les renomme d'un coup.
+    df = df[list(COLONNES.keys())].rename(columns=COLONNES)
+
+    # 2) Prix : "9,500" -> "9500" -> 9500.0. On enlève la virgule des milliers.
+    df["retail_price"] = df["retail_price"].astype(str).str.replace(",", "", regex=False)
+
+    # 3) On convertit toutes les colonnes numériques ; une valeur illisible -> NaN.
+    for col in COLONNES_NUM:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # 4) retail_price est obligatoire : on jette les lignes sans prix valide.
+    avant = len(df)
+    df = df.dropna(subset=["retail_price"])
+    ignorees = avant - len(df)
+    if ignorees:
+        print(f"⚠️  {ignorees} ligne(s) sans prix valide ignorée(s).")
+
+    # 5) pandas met NaN pour les cases vides ; SQLAlchemy veut None -> on convertit.
+    df = df.astype(object).where(pd.notnull(df), None)
+
+    return df
+
+
+def importer():
+    init_db()  # s'assure que les tables existent
+
+    df = charger_csv()
+
+    with SessionLocal() as db:
+        # On vide d'abord la table pour que relancer le script ne crée pas de doublons
+        # (on a retiré la contrainte UNIQUE, donc c'est notre garde-fou anti-doublon).
+        db.execute(delete(Watch))
+
+        # Chaque ligne du DataFrame -> un objet Watch. **row déplie le dict en arguments.
+        montres = [Watch(**row) for row in df.to_dict(orient="records")]
+        db.add_all(montres)
+        db.commit()
+
+    print(f"✅ {len(df)} montres importées dans la base.")
+
+
+if __name__ == "__main__":
+    importer()
