@@ -1,15 +1,13 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
+from sqlalchemy import select, or_
+from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from database import get_db
+from models import Watch
 from schemas import WatchCreate, WatchUpdate, WatchOut
 
 router = APIRouter()
-
-
-def _row_to_dict(row) -> dict:
-    """Convertit un sqlite3.Row en dict pour Pydantic."""
-    return dict(row)
 
 
 # ── Lister / Filtrer ──────────────────────────────────────────────────────────
@@ -20,65 +18,52 @@ def list_watches(
     category:  Optional[str]   = Query(None),
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
+    db: Session = Depends(get_db),
 ):
     """
-    SELECT avec filtres dynamiques construits proprement
-    via des paramètres positionnels — jamais de f-string dans le SQL.
+    On part de select(Watch) et on ajoute des .where() seulement pour les filtres
+    fournis. ilike = LIKE insensible à la casse. Chaque .where() renvoie une NOUVELLE
+    requête, d'où le stmt = stmt.where(...).
     """
-    sql    = "SELECT * FROM watches WHERE 1=1"
-    params: list = []
+    stmt = select(Watch)
 
     if brand:
-        sql += " AND brand LIKE ?"
-        params.append(f"%{brand}%")
+        stmt = stmt.where(Watch.brand.ilike(f"%{brand}%"))
     if category:
-        sql += " AND category LIKE ?"
-        params.append(f"%{category}%")
+        stmt = stmt.where(Watch.category.ilike(f"%{category}%"))
     if min_price is not None:
-        sql += " AND retail_price >= ?"
-        params.append(min_price)
+        stmt = stmt.where(Watch.retail_price >= min_price)
     if max_price is not None:
-        sql += " AND retail_price <= ?"
-        params.append(max_price)
+        stmt = stmt.where(Watch.retail_price <= max_price)
 
-    with get_db() as conn:
-        rows = conn.execute(sql, params).fetchall()
-
-    return [_row_to_dict(r) for r in rows]
+    # scalars(...).all() renvoie une liste d'objets Watch (pas des tuples).
+    return db.scalars(stmt).all()
 
 
 # ── Rechercher ────────────────────────────────────────────────────────────────
-# term = f"%{q}%" construit le terme de recherche pour le LIKE en SQL.
-# % est un joker SQL qui signifie "n'importe quels caractères".
 
 @router.get("/search", response_model=List[WatchOut])
-def search_watches(q: str = Query(..., min_length=1)):
-    """
-    Recherche plein-texte sur brand, model, colorway.
-    Le même paramètre ? est réutilisé trois fois.
-    """
-    sql = """
-        SELECT * FROM watches
-        WHERE brand    LIKE ?
-           OR model    LIKE ?
-           OR colorway LIKE ?
-    """
+def search_watches(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+    """Recherche plein-texte sur brand, model, dial_color (or_ = OU logique)."""
     term = f"%{q}%"
-
-    with get_db() as conn:
-        rows = conn.execute(sql, [term, term, term]).fetchall()
-
-    return [_row_to_dict(r) for r in rows]
+    stmt = select(Watch).where(
+        or_(
+            Watch.brand.ilike(term),
+            Watch.model.ilike(term),
+            Watch.dial_color.ilike(term),
+        )
+    )
+    return db.scalars(stmt).all()
 
 
 # ── Comparer ──────────────────────────────────────────────────────────────────
 
 @router.get("/compare", response_model=List[WatchOut])
-def compare_watches(ids: str = Query(..., description="IDs séparés par virgule : 1,2")):
-    """
-    SELECT avec IN (?, ?, ...) — le nombre de placeholders
-    est généré dynamiquement selon la liste d'IDs.
-    """
+def compare_watches(
+    ids: str = Query(..., description="IDs séparés par virgule : 1,2"),
+    db: Session = Depends(get_db),
+):
+    """SELECT ... WHERE id IN (...) via Watch.id.in_(liste)."""
     try:
         id_list = [int(i) for i in ids.split(",")]
     except ValueError:
@@ -87,99 +72,73 @@ def compare_watches(ids: str = Query(..., description="IDs séparés par virgule
     if len(id_list) < 2:
         raise HTTPException(status_code=400, detail="Fournir au moins 2 IDs")
 
-    placeholders = ", ".join("?" * len(id_list))
-    sql = f"SELECT * FROM watches WHERE id IN ({placeholders})"
-
-    with get_db() as conn:
-        rows = conn.execute(sql, id_list).fetchall()
+    rows = db.scalars(select(Watch).where(Watch.id.in_(id_list))).all()
 
     if len(rows) < 2:
         raise HTTPException(status_code=404, detail="Un ou plusieurs IDs introuvables")
 
-    return [_row_to_dict(r) for r in rows]
+    return rows
 
 
 # ── Voir une montre ───────────────────────────────────────────────────────────
 
 @router.get("/{watch_id}", response_model=WatchOut)
-def get_watch(watch_id: int):
-    """SELECT * FROM watches WHERE id = ?"""
-    with get_db() as conn:
-        row = conn.execute(
-            "SELECT * FROM watches WHERE id = ?", [watch_id]
-        ).fetchone()
-
-    if not row:
+def get_watch(watch_id: int, db: Session = Depends(get_db)):
+    """db.get(Watch, id) = récupération directe par clé primaire (le plus simple)."""
+    watch = db.get(Watch, watch_id)
+    if not watch:
         raise HTTPException(status_code=404, detail="Watch introuvable")
-
-    return _row_to_dict(row)
+    return watch
 
 
 # ── Créer ─────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=WatchOut, status_code=201)
-def create_watch(payload: WatchCreate):
+def create_watch(payload: WatchCreate, db: Session = Depends(get_db)):
     """
-    INSERT avec tous les champs nommés.
-    On vérifie d'abord que la référence n'existe pas (UNIQUE).
+    On construit un objet Watch à partir du payload validé, on l'ajoute à la
+    session, on valide (commit), puis refresh pour récupérer l'id auto-généré.
     """
-    sql_check = "SELECT id FROM watches WHERE reference = ?"
-    sql_insert = """
-        INSERT INTO watches
-            (brand, model, colorway, bracelet, reference, category,
-             size_range, retail_price, resale_price,
-             release_year, description, image_url, is_available)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """
-
-    with get_db() as conn:
-        if conn.execute(sql_check, [payload.reference]).fetchone():
-            raise HTTPException(status_code=409, detail="Référence déjà existante")
-
-        cursor = conn.execute(sql_insert, [
-            payload.brand, payload.model, payload.colorway, payload.bracelet,
-            payload.reference, payload.category, payload.size_range,
-            payload.retail_price, payload.resale_price,
-            payload.release_year, payload.description,
-            payload.image_url, int(payload.is_available),
-        ])
-        new_id = cursor.lastrowid
-        row = conn.execute("SELECT * FROM watches WHERE id = ?", [new_id]).fetchone()
-
-    return _row_to_dict(row)
+    watch = Watch(**payload.model_dump())
+    db.add(watch)
+    db.commit()
+    db.refresh(watch)
+    return watch
 
 
 # ── Modifier ──────────────────────────────────────────────────────────────────
 
 @router.patch("/{watch_id}", response_model=WatchOut)
-def update_watch(watch_id: int, payload: WatchUpdate):
+def update_watch(watch_id: int, payload: WatchUpdate, db: Session = Depends(get_db)):
     """
-    UPDATE dynamique : on ne met à jour que les champs fournis.
-    Construction du SET clause colonne par colonne.
+    On récupère l'objet, puis on modifie SES attributs Python : SQLAlchemy suit
+    les changements et génère le UPDATE tout seul au commit.
+    exclude_unset=True = ne garder que les champs réellement envoyés.
     """
+    watch = db.get(Watch, watch_id)
+    if not watch:
+        raise HTTPException(status_code=404, detail="watch introuvable")
+
     fields = payload.model_dump(exclude_unset=True)
     if not fields:
         raise HTTPException(status_code=400, detail="Aucun champ à modifier")
 
-    set_clause = ", ".join(f"{col} = ?" for col in fields)
-    values     = list(fields.values()) + [watch_id]
-    sql        = f"UPDATE watches SET {set_clause} WHERE id = ?"
+    for key, value in fields.items():
+        setattr(watch, key, value)
 
-    with get_db() as conn:
-        cursor = conn.execute(sql, values)
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="watch introuvable")
-        row = conn.execute("SELECT * FROM watches WHERE id = ?", [watch_id]).fetchone()
-
-    return _row_to_dict(row)
+    db.commit()
+    db.refresh(watch)
+    return watch
 
 
 # ── Supprimer ─────────────────────────────────────────────────────────────────
 
 @router.delete("/{watch_id}", status_code=204)
-def delete_watch(watch_id: int):
-    """DELETE FROM watches WHERE id = ?"""
-    with get_db() as conn:
-        cursor = conn.execute("DELETE FROM watches WHERE id = ?", [watch_id])
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="watch introuvable")
+def delete_watch(watch_id: int, db: Session = Depends(get_db)):
+    """db.delete(objet) + commit."""
+    watch = db.get(Watch, watch_id)
+    if not watch:
+        raise HTTPException(status_code=404, detail="watch introuvable")
+
+    db.delete(watch)
+    db.commit()
