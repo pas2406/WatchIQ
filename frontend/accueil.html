@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accueil</title>
     <link rel="stylesheet" href="stylesheet.css">
+    <script src="./accueil.js" defer></script>
 </head>
 
 
@@ -44,33 +45,15 @@
         </div> 
 
         <section class="watches">
-            <div>
-                <h2 class="surtitle">Selection</h2>
-            </div>
-            <div class="watch-list">
+            <h2 class="surtitle">Sélection</h2>
 
-                <article class="watch">
-                    <img class="watch-img" src="logo.avif" alt="" width="345" height="320">
+            <div class="carousel">
+                <button type="button" class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Précédent">‹</button>
 
-                    <div class="watch-body">
-                        <div class="watch-brand">ROLEX</div>
-                        <div class="watch-model">Submariner Date</div>
-                        <div class="watch-mecanism">Automatique.41mm</div>
-                        <div class="watch-info"> 
-                            <div class=watch-price>$ 10.900 </div>
-                            <div >   
-                                <a class ="watch-detail" href="watch.html">Details</a>
-                            </div>
-                        </div>
+                <!-- Les cartes sont ajoutées dynamiquement par accueil.js -->
+                <div class="carousel-track" id="carousel-track"></div>
 
-                    </div>²
-
-                </article>
-
-
-                <article class="watch"></article>
-                <article class="watch"></article>
-        
+                <button type="button" class="carousel-btn carousel-next" id="carousel-next" aria-label="Suivant">›</button>
             </div>
         </section>
 

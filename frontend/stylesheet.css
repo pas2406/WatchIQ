@@ -721,3 +721,61 @@ a{
     border-radius: 1rem;
 }
 
+
+/* ── Carrousel de la page d'accueil ────────────────────────────────────────── */
+.carousel{
+    position: relative;        /* repère pour placer les flèches */
+}
+
+/* La piste qui défile horizontalement */
+.carousel-track{
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;                  /* défilement horizontal */
+    padding: 1rem 0 1.5rem;
+}
+
+/* Chaque carte du carrousel garde sa taille */
+.carousel-track .watch{
+    flex: 0 0 356px;
+}
+
+/* Barre de défilement fine et discrète */
+.carousel-track::-webkit-scrollbar{
+    height: 8px;
+}
+.carousel-track::-webkit-scrollbar-thumb{
+    background: rgb(2, 37, 74);
+    border-radius: 4px;
+}
+
+/* Flèches de navigation */
+.carousel-btn{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    line-height: 1;
+    color: rgb(6, 25, 45);
+    background: rgba(187, 142, 65, 0.914);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 1px 1px 20px rgb(2, 37, 74);
+}
+
+.carousel-btn:hover{
+    box-shadow: 1px 1px 20px rgba(187, 142, 65, 0.914);
+}
+
+.carousel-prev{
+    left: -10px;
+}
+
+.carousel-next{
+    right: -10px;
+}
+
