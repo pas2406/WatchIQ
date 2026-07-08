@@ -647,3 +647,77 @@ a{
     border-color: rgba(187, 142, 65, 0.914);
 }
 
+
+/* ── Page Versus (comparateur) ─────────────────────────────────────────────── */
+.versus{
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-bottom: 4rem;
+}
+
+.versus-col{
+    flex: 1 1 340px;   /* deux colonnes qui se réorganisent si l'écran est étroit */
+}
+
+/* Sélecteur cherchable */
+.vs-select{
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.vs-toggle{
+    width: 100%;       /* le bouton prend toute la largeur de la colonne */
+}
+
+.vs-menu{
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: 10px;
+    background: rgb(6, 25, 45);
+    border: 1px solid rgb(2, 37, 74);
+    border-radius: 1rem;
+    box-shadow: 1px 1px 20px rgb(2, 37, 74);
+    display: none;                 /* fermé par défaut */
+}
+
+.vs-menu.open{
+    display: block;                /* ouvert */
+}
+
+.vs-search{
+    width: 100%;
+    margin-bottom: 10px;           /* le champ reste fixe, seule la liste défile */
+}
+
+.vs-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 260px;
+    overflow-y: auto;              /* la liste des montres défile */
+}
+
+/* Fiche d'une montre dans une colonne */
+.vs-card-img{
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    margin: 0 auto 1.2rem;
+    border-radius: 1rem;
+    border: 1px solid rgb(2, 37, 74);
+    background: linear-gradient(to right, rgb(2, 37, 74), rgb(1, 3, 13));
+}
+
+.vs-placeholder{
+    padding: 3rem 1rem;
+    text-align: center;
+    color: gray;
+    border: 1px dashed rgb(2, 37, 74);
+    border-radius: 1rem;
+}
+

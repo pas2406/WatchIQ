@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Versus — WatchIQ</title>
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="./versus.js" defer></script>
+</head>
+<body>
+    <div class="container">
+
+        <header class="header">
+            <a href="/" class="logo">WatchIQ</a>
+
+            <nav class="navigation">
+                <a href="accueil.html">Accueil</a>
+                <a href="catalogue.html">Catalogue</a>
+                <a href="versus.html">Versus</a>
+                <a href="admin.html">Administration</a>
+            </nav>
+
+            <nav class="navigation-right">
+                <a class="btn-fill" href="#">Connexion</a>
+                <a class="btn-fill" href="#">S'inscrire</a>
+            </nav>
+        </header>
+
+        <div class="head">Versus</div>
+        <div class="slogan">Comparer deux montres</div>
+
+        <div class="versus" id="versus">
+
+            <!-- Colonne A -->
+            <div class="versus-col">
+                <div class="vs-select" id="vs-select-a">
+                    <button type="button" class="dropdown-toggle vs-toggle" id="vs-toggle-a">
+                        Choisir une montre
+                    </button>
+                    <div class="vs-menu" id="vs-menu-a">
+                        <input type="text" class="input-form vs-search" id="vs-search-a"
+                               placeholder="Rechercher…">
+                        <ul class="vs-list" id="vs-list-a"></ul>
+                    </div>
+                </div>
+                <div class="vs-card" id="vs-card-a"></div>
+            </div>
+
+            <!-- Colonne B -->
+            <div class="versus-col">
+                <div class="vs-select" id="vs-select-b">
+                    <button type="button" class="dropdown-toggle vs-toggle" id="vs-toggle-b">
+                        Choisir une montre
+                    </button>
+                    <div class="vs-menu" id="vs-menu-b">
+                        <input type="text" class="input-form vs-search" id="vs-search-b"
+                               placeholder="Rechercher…">
+                        <ul class="vs-list" id="vs-list-b"></ul>
+                    </div>
+                </div>
+                <div class="vs-card" id="vs-card-b"></div>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>
