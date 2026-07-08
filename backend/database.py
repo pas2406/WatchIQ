@@ -8,24 +8,32 @@ Rôle de ce fichier = la "plomberie" :
   - get_db()      : la dépendance FastAPI qui ouvre/ferme une session par requête HTTP
 """
 
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 
 
 # ── L'URL de connexion ────────────────────────────────────────────────────────
-# "sqlite:///watchvault.db" = un simple fichier watchvault.db dans ce dossier.
-# Pour passer à PostgreSQL plus tard, il suffira de changer CETTE ligne, par ex. :
-#   "postgresql+psycopg://user:mdp@localhost/watchvault"
-DATABASE_URL = "sqlite:///watchvault.db"
+# En PRODUCTION, l'hébergeur (Render) fournit une variable d'environnement
+# DATABASE_URL pointant vers PostgreSQL. En LOCAL, on retombe sur SQLite (fichier).
+# Grâce à l'ORM, changer de base = changer cette URL, rien d'autre.
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///watchvault.db")
+
+# Certains hébergeurs donnent une URL "postgres://…" ; SQLAlchemy + psycopg (v3)
+# attend "postgresql+psycopg://…". On normalise le préfixe.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 
 # ── L'engine : le moteur de connexion ─────────────────────────────────────────
-# check_same_thread=False est spécifique à SQLite : FastAPI peut utiliser la base
-# depuis plusieurs threads, et SQLite l'interdit par défaut. On lève cette limite.
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+# check_same_thread=False est spécifique à SQLite ; inutile (et invalide) pour
+# PostgreSQL, donc on ne le passe que pour SQLite.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 
 # ── La fabrique de sessions ───────────────────────────────────────────────────

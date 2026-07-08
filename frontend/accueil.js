@@ -3,7 +3,7 @@
 //  Carrousel horizontal d'une sélection de montres (défilement auto + flèches).
 // ─────────────────────────────────────────────────────────────────────────────
 
-const API_URL = "http://127.0.0.1:8000";
+// API_URL est défini dans config.js (chargé avant ce script).
 const PLACEHOLDER_IMG = "logo.avif";
 const SELECTION_SIZE = 12;          // nombre de montres dans le carrousel
 

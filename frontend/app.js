@@ -3,8 +3,7 @@
 //  Récupère les montres depuis l'API FastAPI et les affiche dynamiquement.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Adresse de base de l'API (le serveur uvicorn).
-const API_URL = "http://127.0.0.1:8000";
+// API_URL est défini dans config.js (chargé avant ce script).
 
 // Image affichée tant qu'une montre n'a pas de vraie photo (image_url vide).
 const PLACEHOLDER_IMG = "logo.avif";

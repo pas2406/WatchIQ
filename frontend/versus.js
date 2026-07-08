@@ -4,7 +4,7 @@
 //  compare côte à côte via GET /watch/compare?ids=A,B.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const API_URL = "http://127.0.0.1:8000";
+// API_URL est défini dans config.js (chargé avant ce script).
 const PLACEHOLDER_IMG = "logo.avif";
 
 let allWatches = [];                 // toutes les montres (pour remplir les listes)

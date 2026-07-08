@@ -3,7 +3,7 @@
 //  Lit l'id dans l'URL (watch.html?id=42), appelle GET /watch/42, affiche la fiche.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const API_URL = "http://127.0.0.1:8000";
+// API_URL est défini dans config.js (chargé avant ce script).
 const PLACEHOLDER_IMG = "logo.avif";
 
 

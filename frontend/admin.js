@@ -3,7 +3,7 @@
 //  Action 1 : lister l'inventaire (tableau + statistiques) depuis l'API.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const API_URL = "http://127.0.0.1:8000";
+// API_URL est défini dans config.js (chargé avant ce script).
 
 // On garde la liste complète en mémoire pour pouvoir la filtrer sans re-appeler l'API.
 let allWatches = [];
