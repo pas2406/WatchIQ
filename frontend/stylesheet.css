@@ -478,6 +478,25 @@ a{
     text-align: left;
     max-height: 88vh;
     overflow-y: auto;        /* le formulaire défile si l'écran est petit */
+    /* Firefox : barre fine et colorée */
+    scrollbar-width: thin;
+    scrollbar-color: rgb(2, 37, 74) transparent;
+}
+
+/* Chrome / Edge / Safari : barre de défilement personnalisée */
+.modal-form::-webkit-scrollbar{
+    width: 10px;
+}
+.modal-form::-webkit-scrollbar-track{
+    background: transparent;
+    margin: 8px 0;
+}
+.modal-form::-webkit-scrollbar-thumb{
+    background: rgb(2, 37, 74);
+    border-radius: 100px;
+}
+.modal-form::-webkit-scrollbar-thumb:hover{
+    background: rgba(187, 142, 65, 0.914);   /* doré au survol */
 }
 
 .modal-header{
@@ -574,6 +593,25 @@ a{
     border: solid 1px gray;
     border-radius: 1rem;
     padding: 0 20px 16px;
+    /* Firefox : barre fine et colorée */
+    scrollbar-width: thin;
+    scrollbar-color: rgb(2, 37, 74) transparent;
+}
+
+/* Chrome / Edge / Safari : barre de défilement personnalisée */
+.admin-table-wrap::-webkit-scrollbar{
+    width: 10px;
+}
+.admin-table-wrap::-webkit-scrollbar-track{
+    background: transparent;
+    margin: 8px 0;
+}
+.admin-table-wrap::-webkit-scrollbar-thumb{
+    background: rgb(2, 37, 74);
+    border-radius: 100px;
+}
+.admin-table-wrap::-webkit-scrollbar-thumb:hover{
+    background: rgba(187, 142, 65, 0.914);   /* doré au survol */
 }
 
 .admin-table{
@@ -594,6 +632,16 @@ a{
 .admin-table td{
     padding: 12px 8px;
     border-bottom: 1px solid rgb(2, 37, 74);
+}
+
+/* Boutons d'action dans les lignes : plus compacts */
+.admin-table td button{
+    padding: 6px 14px;
+    font-size: 14px;
+}
+
+.admin-table td button + button{
+    margin-left: 8px;
 }
 
 .marque{
