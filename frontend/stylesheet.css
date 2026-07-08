@@ -26,7 +26,26 @@ a{
     align-items: center;
     padding-top: 2rem;
     padding-bottom: 1.8rem;
-    
+    /* barre fixe en haut pendant le défilement */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Fond pleine largeur derrière la navbar : reprend le dégradé du body pour que
+   les bords latéraux soient invisibles. left:50% + translateX(-50%) + 100vw =
+   astuce classique pour déborder d'un conteneur centré et couvrir tout l'écran. */
+.header::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    z-index: -1;
+    background: linear-gradient(to right, rgb(6, 25, 45), rgb(1, 3, 13));
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
 }
 
 .logo{
@@ -422,5 +441,112 @@ a{
 }
 .modele{
     font-weight: bold;
+}
+
+
+/* ── Page détail d'une montre ──────────────────────────────────────────────── */
+.back-link{
+    display: inline-block;
+    color: gray;
+    margin: 1.5rem 0;
+}
+
+.back-link:hover{
+    color: rgba(187, 142, 65, 0.914);
+}
+
+.detail{
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    padding-bottom: 4rem;
+}
+
+.detail-img{
+    width: 420px;
+    max-width: 100%;
+    height: auto;
+    align-self: flex-start;
+    border-radius: 1rem;
+    border: 1px solid rgb(2, 37, 74);
+    background: linear-gradient(to right, rgb(2, 37, 74), rgb(1, 3, 13));
+    box-shadow: 1px 1px 20px rgb(2, 37, 74);
+}
+
+.detail-info{
+    flex: 1 1 380px;
+}
+
+.detail-brand{
+    color: rgba(187, 142, 65, 0.914);
+    text-transform: uppercase;
+    font-weight: 200;
+    letter-spacing: 1px;
+}
+
+.detail-model{
+    font-size: 34px;
+    font-weight: 700;
+    color: #dddddd;
+    margin: 6px 0 18px;
+}
+
+.detail-price-row{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.detail-price{
+    color: rgba(187, 142, 65, 0.914);
+    font-size: 26px;
+    font-weight: bold;
+    font-family: Cambria, Cochin, Georgia, Times, serif;
+}
+
+.badge{
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: small;
+    border: 1px solid;
+}
+
+.badge-ok{
+    color: #6fcf97;
+    border-color: #6fcf97;
+}
+
+.badge-off{
+    color: gray;
+    border-color: gray;
+}
+
+.specs{
+    border-top: 1px solid rgb(2, 37, 74);
+}
+
+.spec-row{
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 12px 4px;
+    border-bottom: 1px solid rgb(2, 37, 74);
+}
+
+.spec-label{
+    color: gray;
+}
+
+.spec-value{
+    color: #dddddd;
+    font-weight: 600;
+    text-align: right;
+}
+
+.detail-error{
+    padding: 3rem 0;
+    font-size: 20px;
+    color: gray;
 }
 
