@@ -24,8 +24,8 @@ a{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 2rem;
-    padding-bottom: 1.8rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     /* barre fixe en haut pendant le défilement */
     position: sticky;
     top: 0;
