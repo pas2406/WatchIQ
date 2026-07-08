@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catalogue</title>
     <link rel="stylesheet" href="stylesheet.css">
+    <script src="./app.js" defer></script>
+    
 </head>
 <body>
 
@@ -53,42 +55,10 @@
         </div>
 
         <section>
-            <div class="quantity"> 3 montres</div>
+            <!-- Ces deux éléments sont remplis dynamiquement par app.js -->
+            <div class="quantity" id="quantity">Chargement…</div>
 
-            <div class="watch-list">
-
-                <article class="watch">
-                    <img class="watch-img" src="logo.avif" alt="" width="345" height="320">
-
-                    <div class="watch-body">
-                        <div class="watch-brand">ROLEX</div>
-                        <div class="watch-model">Submariner Date</div>
-                        <div class="watch-mecanism">Automatique.41mm</div>
-                        <div class="watch-info"> 
-                            <div class=watch-price>$ 10.900 </div>
-                            <div >   
-                                <a class ="watch-detail" href="watch.html">Details</a>
-                            </div>
-                        </div>
-
-                    </div>²
-
-                </article>
-
-
-                <article class="watch"></article>
-                <article class="watch"></article>
-                <article class="watch"></article>
-                <article class="watch"></article>
-                <article class="watch"></article>
-                <article class="watch"></article>
-                <article class="watch"></article>
-                <article class="watch"></article>
-
-
-
-        
-            </div>
+            <div class="watch-list" id="watch-list"></div>
         </section>
     </div>
 
