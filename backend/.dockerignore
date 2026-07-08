@@ -1,0 +1,9 @@
+# Fichiers à NE PAS copier dans l'image Docker (comme .gitignore, mais pour Docker).
+.venv/
+__pycache__/
+*.pyc
+*.db
+*.db.bak
+.env
+Dockerfile
+.dockerignore
