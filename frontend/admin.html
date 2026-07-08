@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,132 +10,180 @@
 <body>
     <div class="container">
         <header class="header">
-            <a href="/" class="logo">
-                WatchIQ
-            </a>
-            
+            <a href="/" class="logo">WatchIQ</a>
+
             <nav class="navigation">
                 <a href="accueil.html">Accueil</a>
                 <a href="catalogue.html">Catalogue</a>
                 <a href="versus.html">Versus</a>
                 <a href="admin.html">Administration</a>
             </nav>
-            
+
             <nav class="navigation-right">
-                <a class=btn-fill href ="#">Connexion</a>
-                <a class=btn-fill href="#">S'inscrire</a>
+                <a class="btn-fill" href="#">Connexion</a>
+                <a class="btn-fill" href="#">S'inscrire</a>
             </nav>
         </header>
-        
-        <div>
-            <div class ="head">espace d'administration</div>
-            <div class="slogan"> Gérer le catalogue</div>
 
+        <div class="head">espace d'administration</div>
+        <div class="slogan">Gérer le catalogue</div>
 
-            <div class="inventaire">
-                <div class="box">
-                    <div class="gold" id="stat-count">—</div>
-                    <div>MONTRES AU CATALOGUE</div>
-                </div>
-                <div class="box">
-                    <div class="gold" id="stat-brands">—</div>
-                    <div>MARQUES</div>
-                </div>
-                <div class="box">
-                    <div class="gold" id="stat-available">—</div>
-                    <div>DISPONIBLES</div>
-                </div>
+        <div class="inventaire">
+            <div class="box">
+                <div class="gold" id="stat-count">—</div>
+                <div>MONTRES AU CATALOGUE</div>
             </div>
-
+            <div class="box">
+                <div class="gold" id="stat-brands">—</div>
+                <div>MARQUES</div>
+            </div>
+            <div class="box">
+                <div class="gold" id="stat-available">—</div>
+                <div>DISPONIBLES</div>
+            </div>
         </div>
 
-        <div class="admin">
+        <!-- Barre d'outils : filtre + bouton d'ajout -->
+        <div class="admin-toolbar">
+            <input class="input-form" type="text" id="admin-search"
+                   placeholder="Filtrer par marque ou modèle…">
+            <button class="btn-fill" id="open-create">+ Ajouter une montre</button>
+        </div>
 
-            <div class="form">
-                <form id="create-form">
-                    <div class="form-watch">
-                        <label for="brandinput">Marque</label>
-                        <input class="input-form" type="text" name="Marque" id="brandinput">
-                    </div>
-
-                    <div class="form-watch">
-                        <label for="modelinput">Modele</label>
-                        <input class="input-form"  type="text" name="Modele" id="modelinput">
-                    </div>
-
-                    <div class="form-watch">
-                        <label for="Refinput">Reference</label>
-                        <input  class="input-form" type="text" name="Reference" id="Refinput">
-                    </div>
-
-                    <div class="form-double">
-                        <div>
-                                <label for="prixinput">Prix</label>
-                                <input class="input-form" type="number" name="prix" id="prixinput">
-                        </div>
-
-                        <div>
-                                <label for="diametre-input">Diamétre</label>
-                                <input class="input-form" type="number" name="diametre" id="diametre-input">
-                        </div>
-
-                    </div>
-
-                    <div class="form-double">
-                        <div>
-                                <label for="categoryinput">Categorie</label>
-                                <input class="input-form" type="text" name="categorie" id="categoryinput"> 
-                        </div>
-
-                        <div>
-                                <label for="mvtinput">Mouvement</label>
-                                <input class="input-form" type="text" name="mouvement" id="mvtinput"> 
-                        </div>
-
-                    </div>
-
-                    <div class="form-watch">
-                        <label for="description-input">Description</label>
-                        <input class="input-form" type="text" name="Desription" id="description-input"> 
-                    </div>
-
-                    <div>
-                        <button id="create-btn"  class="btn-fill">AJOUTER LA MONTRE</button>
-                    </div>
-
-                    <!-- message de retour (succès / erreur) rempli par admin.js -->
-                    <p id="form-message"></p>
-
-
-                </form>
-
-            </div>
-
-            <div class="admin-panel">
-                <input class="input-form" type="text" id="admin-search"
-                       placeholder="Filtrer par marque ou modèle…">
-
-                <div class="admin-table-wrap">
-                    <table class="admin-table">
-                        <thead>
-                          <tr>
-                            <th>Montre</th>
-                            <th>Référence</th>
-                            <th>Prix</th>
-                            <th></th>
-                          </tr>
-                        </thead>
-                        <!-- Les lignes sont ajoutées dynamiquement par admin.js -->
-                        <tbody id="admin-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
-             
-
+        <!-- Tableau en pleine largeur -->
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Montre</th>
+                        <th>Référence</th>
+                        <th>Prix</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <!-- Les lignes sont ajoutées dynamiquement par admin.js -->
+                <tbody id="admin-tbody"></tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Fenêtre de confirmation, centrée et cachée par défaut (pilotée par admin.js) -->
+    <!-- ── Modale : ajouter une montre ──────────────────────────────────────── -->
+    <div class="modal-overlay" id="create-modal">
+        <div class="modal modal-form">
+            <div class="modal-header">
+                <h3 class="modal-title">Ajouter une montre</h3>
+                <button type="button" class="modal-x" id="create-close" aria-label="Fermer">×</button>
+            </div>
+
+            <form id="create-form">
+                <div class="form-grid">
+
+                    <div class="form-section-title">Essentiel</div>
+                    <div class="field">
+                        <label for="brandinput">Marque <sup>*</sup></label>
+                        <input class="input-form" type="text" id="brandinput">
+                    </div>
+                    <div class="field">
+                        <label for="modelinput">Modèle <sup>*</sup></label>
+                        <input class="input-form" type="text" id="modelinput">
+                    </div>
+                    <div class="field">
+                        <label for="prixinput">Prix ($) <sup>*</sup></label>
+                        <input class="input-form" type="number" step="0.01" id="prixinput">
+                    </div>
+                    <div class="field">
+                        <label for="resaleinput">Prix de revente ($)</label>
+                        <input class="input-form" type="number" step="0.01" id="resaleinput">
+                    </div>
+
+                    <div class="form-section-title">Caractéristiques</div>
+                    <div class="field">
+                        <label for="caseinput">Matière boîtier</label>
+                        <input class="input-form" type="text" id="caseinput">
+                    </div>
+                    <div class="field">
+                        <label for="braceletinput">Bracelet</label>
+                        <input class="input-form" type="text" id="braceletinput">
+                    </div>
+                    <div class="field">
+                        <label for="mvtinput">Mouvement</label>
+                        <input class="input-form" type="text" id="mvtinput">
+                    </div>
+                    <div class="field">
+                        <label for="waterinput">Étanchéité</label>
+                        <input class="input-form" type="text" id="waterinput">
+                    </div>
+                    <div class="field">
+                        <label for="crystalinput">Verre</label>
+                        <input class="input-form" type="text" id="crystalinput">
+                    </div>
+                    <div class="field">
+                        <label for="complicationsinput">Complications</label>
+                        <input class="input-form" type="text" id="complicationsinput">
+                    </div>
+                    <div class="field">
+                        <label for="powerinput">Réserve de marche</label>
+                        <input class="input-form" type="text" id="powerinput">
+                    </div>
+                    <div class="field">
+                        <label for="dialinput">Couleur du cadran</label>
+                        <input class="input-form" type="text" id="dialinput">
+                    </div>
+
+                    <div class="form-section-title">Mesures</div>
+                    <div class="field">
+                        <label for="diametre-input">Diamètre (mm)</label>
+                        <input class="input-form" type="number" step="0.1" id="diametre-input">
+                    </div>
+                    <div class="field">
+                        <label for="thicknessinput">Épaisseur (mm)</label>
+                        <input class="input-form" type="number" step="0.1" id="thicknessinput">
+                    </div>
+                    <div class="field">
+                        <label for="bandwidthinput">Largeur bracelet (mm)</label>
+                        <input class="input-form" type="number" step="0.1" id="bandwidthinput">
+                    </div>
+                    <div class="field">
+                        <label for="yearinput">Année de sortie</label>
+                        <input class="input-form" type="number" id="yearinput">
+                    </div>
+
+                    <div class="form-section-title">Infos</div>
+                    <div class="field">
+                        <label for="Refinput">Référence</label>
+                        <input class="input-form" type="text" id="Refinput">
+                    </div>
+                    <div class="field">
+                        <label for="categoryinput">Catégorie</label>
+                        <input class="input-form" type="text" id="categoryinput">
+                    </div>
+                    <div class="field field-full">
+                        <label for="imageinput">URL de l'image</label>
+                        <input class="input-form" type="text" id="imageinput" placeholder="https://…">
+                    </div>
+                    <div class="field field-full">
+                        <label for="description-input">Description</label>
+                        <input class="input-form" type="text" id="description-input">
+                    </div>
+
+                    <div class="form-check field-full">
+                        <input type="checkbox" id="availableinput" checked>
+                        <label for="availableinput">Disponible</label>
+                    </div>
+                </div>
+
+                <!-- message de retour (succès / erreur) rempli par admin.js -->
+                <p id="form-message"></p>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" id="create-cancel">Annuler</button>
+                    <button type="submit" class="btn-fill">Ajouter la montre</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Modale : confirmation de suppression ─────────────────────────────── -->
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal">
             <p class="modal-text" id="confirm-text">Confirmer ?</p>

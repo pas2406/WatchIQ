@@ -112,6 +112,29 @@ function setupAdminSearch() {
 }
 
 
+// ── Ouverture / fermeture de la modale « Ajouter une montre » ─────────────────
+function setupCreateModal() {
+    const modal = document.querySelector("#create-modal");
+    const openBtn = document.querySelector("#open-create");
+    const closeBtn = document.querySelector("#create-close");
+    const cancelBtn = document.querySelector("#create-cancel");
+    if (!modal) return;
+
+    const open = () => {
+        showMessage("", "");                 // efface un éventuel ancien message
+        modal.classList.add("open");
+    };
+    const close = () => modal.classList.remove("open");
+
+    openBtn.addEventListener("click", open);
+    closeBtn.addEventListener("click", close);
+    cancelBtn.addEventListener("click", close);
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) close();   // clic sur le voile = fermer
+    });
+}
+
+
 // ── Fenêtre de confirmation centrée (remplace le confirm() du navigateur) ─────
 // Renvoie une Promise : true si l'utilisateur confirme, false sinon.
 function confirmDialog(message) {
@@ -199,21 +222,39 @@ function showMessage(text, type) {
 function readForm() {
     // texte : valeur nettoyée, ou null si vide
     const text = (id) => document.querySelector(id).value.trim() || null;
-    // nombre : null si vide, sinon converti en float
+    // nombre décimal : null si vide, sinon float
     const number = (id) => {
         const v = document.querySelector(id).value.trim();
         return v === "" ? null : parseFloat(v);
     };
+    // nombre entier : null si vide, sinon int
+    const integer = (id) => {
+        const v = document.querySelector(id).value.trim();
+        return v === "" ? null : parseInt(v, 10);
+    };
 
     return {
-        brand:        text("#brandinput"),
-        model:        text("#modelinput"),
-        retail_price: number("#prixinput"),
-        reference:    text("#Refinput"),
-        diameter_mm:  number("#diametre-input"),
-        category:     text("#categoryinput"),
-        movement:     text("#mvtinput"),
-        description:  text("#description-input"),
+        brand:            text("#brandinput"),
+        model:            text("#modelinput"),
+        retail_price:     number("#prixinput"),
+        resale_price:     number("#resaleinput"),
+        case_material:    text("#caseinput"),
+        bracelet:         text("#braceletinput"),
+        movement:         text("#mvtinput"),
+        water_resistance: text("#waterinput"),
+        crystal:          text("#crystalinput"),
+        complications:    text("#complicationsinput"),
+        power_reserve:    text("#powerinput"),
+        dial_color:       text("#dialinput"),
+        diameter_mm:      number("#diametre-input"),
+        thickness_mm:     number("#thicknessinput"),
+        band_width_mm:    number("#bandwidthinput"),
+        reference:        text("#Refinput"),
+        category:         text("#categoryinput"),
+        release_year:     integer("#yearinput"),
+        image_url:        text("#imageinput"),
+        description:      text("#description-input"),
+        is_available:     document.querySelector("#availableinput").checked,
     };
 }
 
@@ -251,10 +292,10 @@ function setupCreateForm() {
             }
             if (!response.ok) throw new Error("Erreur serveur");
 
-            const created = await response.json();
-            showMessage(`✅ « ${created.brand} ${created.model} » ajoutée !`, "ok");
+            await response.json();
             form.reset();                                // vide le formulaire
             loadInventory();                             // rafraîchit tableau + stats
+            document.querySelector("#create-modal").classList.remove("open");  // ferme la modale
         } catch (error) {
             showMessage("Impossible d'ajouter la montre. 😕", "error");
             console.error(error);
@@ -266,5 +307,6 @@ function setupCreateForm() {
 // ── Démarrage ─────────────────────────────────────────────────────────────────
 loadInventory();
 setupCreateForm();
+setupCreateModal();
 setupAdminSearch();
 setupDelete();
