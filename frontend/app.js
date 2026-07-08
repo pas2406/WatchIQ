@@ -10,7 +10,7 @@ const API_URL = "http://127.0.0.1:8000";
 const PLACEHOLDER_IMG = "logo.avif";
 
 
-// ── Petit utilitaire : crée un élément avec sa classe et son texte ────────────
+// ── Petit utilitaire : crée un élément avec sa classe et son texte 
 // On utilise textContent (et pas innerHTML) : c'est sûr, ça n'interprète pas le
 // HTML, donc pas de risque d'injection.
 function el(tag, className, text) {
@@ -21,7 +21,7 @@ function el(tag, className, text) {
 }
 
 
-// ── Formate un prix : 9500 -> "9 500 $" ───────────────────────────────────────
+// ── Formate un prix : 9500 -> "9 500 $" 
 function formatPrice(value) {
     return value.toLocaleString("fr-FR") + " $";
 }
@@ -65,30 +65,39 @@ function createWatchCard(watch) {
 }
 
 
-// ── Charge et affiche le catalogue ────────────────────────────────────────────
-async function loadCatalogue() {
+// ── Affiche une liste de montres déjà récupérée ───────────────────────────────
+function renderWatches(watches) {
     const list = document.querySelector("#watch-list");
     const quantity = document.querySelector("#quantity");
 
-    // Sécurité : si on n'est pas sur la page catalogue, on ne fait rien.
-    if (!list) return;
+    list.innerHTML = "";                            // on vide l'affichage précédent
 
+    if (watches.length === 0) {
+        quantity.textContent = "Aucune montre trouvée";
+        return;
+    }
+
+    quantity.textContent = `${watches.length} montres`;
+    for (const watch of watches) {
+        list.append(createWatchCard(watch));
+    }
+}
+
+
+// ── Récupère des montres depuis l'API puis les affiche ────────────────────────
+// `path` = la fin de l'URL, ex. "/watch/" ou "/watch/search?q=rolex".
+async function fetchAndRender(path) {
+    const quantity = document.querySelector("#quantity");
     quantity.textContent = "Chargement…";
 
     try {
-        const response = await fetch(`${API_URL}/watch/`, {
+        const response = await fetch(`${API_URL}${path}`, {
             headers: { Accept: "application/json" },
         });
         if (!response.ok) throw new Error("Erreur serveur");
 
         const watches = await response.json();
-
-        list.innerHTML = "";                       // on vide l'éventuel contenu
-        quantity.textContent = `${watches.length} montres`;
-
-        for (const watch of watches) {
-            list.append(createWatchCard(watch));
-        }
+        renderWatches(watches);
     } catch (error) {
         quantity.textContent = "Impossible de charger le catalogue 😕";
         console.error(error);
@@ -96,5 +105,31 @@ async function loadCatalogue() {
 }
 
 
-// defer garantit que le HTML est chargé quand ce script s'exécute.
-loadCatalogue();
+// ── Branche le formulaire de recherche ────────────────────────────────────────
+function setupSearch() {
+    const form = document.querySelector("#search-form");
+    const input = document.querySelector("#search-input");
+    if (!form) return;
+
+    // submit = quand on tape Entrée ou qu'on valide le formulaire.
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();                     // empêche le rechargement de la page
+        const q = input.value.trim();
+
+        // Champ vide -> on réaffiche tout le catalogue.
+        if (q === "") {
+            fetchAndRender("/watch/");
+        } else {
+            // encodeURIComponent protège les caractères spéciaux dans l'URL.
+            fetchAndRender(`/watch/search?q=${encodeURIComponent(q)}`);
+        }
+    });
+}
+
+
+// ── Démarrage (defer garantit que le HTML est prêt) ───────────────────────────
+// On ne lance rien si on n'est pas sur la page catalogue.
+if (document.querySelector("#watch-list")) {
+    setupSearch();
+    fetchAndRender("/watch/");
+}
