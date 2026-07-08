@@ -8,6 +8,9 @@ const API_URL = "http://127.0.0.1:8000";
 // On garde la liste complète en mémoire pour pouvoir la filtrer sans re-appeler l'API.
 let allWatches = [];
 
+// null = mode "ajout" ; un id = mode "modification" de cette montre.
+let editingId = null;
+
 
 // Utilitaire : crée un élément avec sa classe et son texte.
 function el(tag, className, text) {
@@ -48,11 +51,18 @@ function createRow(watch) {
     // Colonne "Prix"
     tr.append(el("td", null, formatPrice(watch.retail_price)));
 
-    // Colonne actions : un bouton Supprimer (branché à l'action 3 plus tard)
+    // Colonne actions : Modifier + Supprimer. data-action distingue les deux.
     const tdActions = el("td");
+
+    const edit = el("button", "btn-ghost", "Modifier");
+    edit.dataset.id = watch.id;
+    edit.dataset.action = "edit";
+
     const del = el("button", "btn-fill", "Supprimer");
-    del.dataset.id = watch.id;      // on mémorise l'id sur le bouton
-    tdActions.append(del);
+    del.dataset.id = watch.id;
+    del.dataset.action = "delete";
+
+    tdActions.append(edit, del);
     tr.append(tdActions);
 
     return tr;
@@ -112,7 +122,56 @@ function setupAdminSearch() {
 }
 
 
-// ── Ouverture / fermeture de la modale « Ajouter une montre » ─────────────────
+// ── Pré-remplit le formulaire avec une montre (mode modification) ─────────────
+function fillForm(watch) {
+    const set = (id, value) => { document.querySelector(id).value = value ?? ""; };
+    set("#brandinput", watch.brand);
+    set("#modelinput", watch.model);
+    set("#prixinput", watch.retail_price);
+    set("#resaleinput", watch.resale_price);
+    set("#caseinput", watch.case_material);
+    set("#braceletinput", watch.bracelet);
+    set("#mvtinput", watch.movement);
+    set("#waterinput", watch.water_resistance);
+    set("#crystalinput", watch.crystal);
+    set("#complicationsinput", watch.complications);
+    set("#powerinput", watch.power_reserve);
+    set("#dialinput", watch.dial_color);
+    set("#diametre-input", watch.diameter_mm);
+    set("#thicknessinput", watch.thickness_mm);
+    set("#bandwidthinput", watch.band_width_mm);
+    set("#Refinput", watch.reference);
+    set("#categoryinput", watch.category);
+    set("#yearinput", watch.release_year);
+    set("#imageinput", watch.image_url);
+    set("#description-input", watch.description);
+    document.querySelector("#availableinput").checked = watch.is_available;
+}
+
+
+// ── Ouvre la modale en mode "ajout" ───────────────────────────────────────────
+function openModalForCreate() {
+    editingId = null;
+    document.querySelector("#create-form").reset();
+    document.querySelector("#modal-title").textContent = "Ajouter une montre";
+    document.querySelector("#create-submit").textContent = "Ajouter la montre";
+    showMessage("", "");
+    document.querySelector("#create-modal").classList.add("open");
+}
+
+
+// ── Ouvre la modale en mode "modification" (pré-remplie) ──────────────────────
+function openModalForEdit(watch) {
+    editingId = watch.id;
+    fillForm(watch);
+    document.querySelector("#modal-title").textContent = "Modifier la montre";
+    document.querySelector("#create-submit").textContent = "Enregistrer";
+    showMessage("", "");
+    document.querySelector("#create-modal").classList.add("open");
+}
+
+
+// ── Fermeture de la modale (croix, annuler, clic sur le voile) ────────────────
 function setupCreateModal() {
     const modal = document.querySelector("#create-modal");
     const openBtn = document.querySelector("#open-create");
@@ -120,17 +179,13 @@ function setupCreateModal() {
     const cancelBtn = document.querySelector("#create-cancel");
     if (!modal) return;
 
-    const open = () => {
-        showMessage("", "");                 // efface un éventuel ancien message
-        modal.classList.add("open");
-    };
     const close = () => modal.classList.remove("open");
 
-    openBtn.addEventListener("click", open);
+    openBtn.addEventListener("click", openModalForCreate);
     closeBtn.addEventListener("click", close);
     cancelBtn.addEventListener("click", close);
     modal.addEventListener("click", (event) => {
-        if (event.target === modal) close();   // clic sur le voile = fermer
+        if (event.target === modal) close();
     });
 }
 
@@ -176,9 +231,9 @@ function setupDelete() {
     const tbody = document.querySelector("#admin-tbody");
     if (!tbody) return;
 
-    // Un seul écouteur sur tout le tableau (délégation). On retrouve le bouton cliqué.
+    // Un seul écouteur sur tout le tableau (délégation). On ne réagit qu'au bouton Supprimer.
     tbody.addEventListener("click", async (event) => {
-        const button = event.target.closest("button[data-id]");
+        const button = event.target.closest("button[data-action='delete']");
         if (!button) return;
 
         const id = button.dataset.id;
@@ -276,9 +331,14 @@ function setupCreateForm() {
             return;
         }
 
+        // Mode ajout (POST) ou modification (PATCH) selon editingId.
+        const isEdit = editingId !== null;
+        const url = isEdit ? `${API_URL}/watch/${editingId}` : `${API_URL}/watch/`;
+        const method = isEdit ? "PATCH" : "POST";
+
         try {
-            const response = await fetch(`${API_URL}/watch/`, {
-                method: "POST",
+            const response = await fetch(url, {
+                method,
                 headers: {
                     "Content-Type": "application/json",   // on annonce qu'on envoie du JSON
                     Accept: "application/json",
@@ -294,12 +354,29 @@ function setupCreateForm() {
 
             await response.json();
             form.reset();                                // vide le formulaire
+            editingId = null;                            // on repasse en mode ajout
             loadInventory();                             // rafraîchit tableau + stats
             document.querySelector("#create-modal").classList.remove("open");  // ferme la modale
         } catch (error) {
-            showMessage("Impossible d'ajouter la montre. 😕", "error");
+            showMessage("Impossible d'enregistrer la montre. 😕", "error");
             console.error(error);
         }
+    });
+}
+
+
+// ── Action 4 : modifier une montre (ouvre la modale pré-remplie) ──────────────
+function setupEdit() {
+    const tbody = document.querySelector("#admin-tbody");
+    if (!tbody) return;
+
+    tbody.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-action='edit']");
+        if (!button) return;
+
+        const id = Number(button.dataset.id);
+        const watch = allWatches.find((w) => w.id === id);
+        if (watch) openModalForEdit(watch);
     });
 }
 
@@ -310,3 +387,4 @@ setupCreateForm();
 setupCreateModal();
 setupAdminSearch();
 setupDelete();
+setupEdit();
