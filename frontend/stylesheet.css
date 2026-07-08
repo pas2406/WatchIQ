@@ -6,6 +6,7 @@ body {
     color:gray;
     font-family : Arial, Helvetica, sans-serif;
     line-height: 1.3rem;
+    overflow-x: clip;   /* évite tout débordement horizontal (ex. le 100vw de la navbar) */
 
 
 }
@@ -15,7 +16,8 @@ a{
 }
 
 .container{
-    width: 1120px;
+    width: 100%;
+    max-width: 1120px;      /* 1120px sur grand écran, mais rétrécit sur petit écran */
     margin-inline: auto;
 
 }
@@ -257,7 +259,8 @@ a{
 
 .input{
     padding: 12px;
-    width: 450px;
+    width: 100%;
+    max-width: 450px;          /* fluide : jusqu'à 450px, puis rétrécit */
     border: solid 1px rgb(2, 37, 74);
     box-shadow: 1px 1px 20px  rgb(2, 37, 74);
     border-radius: 100px;
@@ -362,6 +365,7 @@ a{
 .inventaire{
     padding-top: 40px;
     display: flex;
+    flex-wrap: wrap;            /* les cartes passent à la ligne si ça ne rentre pas */
     gap: 20px;
     justify-content: center;
     flex:1 1 100%;
@@ -372,7 +376,7 @@ a{
     padding:2rem;
     border: solid 1px grey;
     border-radius: 1rem;
-    width: 400px;
+    flex: 1 1 240px;           /* largeur souple au lieu de 400px fixes */
     background: rgb(6, 25, 45) ;
 }
 
@@ -958,5 +962,60 @@ a{
 
 .carousel-next{
     right: -10px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — règles qui s'appliquent seulement en dessous d'une largeur.
+   On part du grand écran, et on adapte progressivement pour les plus petits.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Écrans un peu plus étroits que le conteneur : on ajoute un retrait latéral
+   pour que le contenu ne colle pas aux bords. */
+@media (max-width: 1160px){
+    .container{
+        padding-inline: 1.5rem;
+    }
+}
+
+/* Tablette : la navbar et la navigation s'empilent et se centrent. */
+@media (max-width: 800px){
+    .header{
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 16px;
+    }
+    .navigation{
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .slogan{
+        font-size: 30px;
+        line-height: 2.2rem;
+    }
+    .search{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+}
+
+/* Téléphone : une seule colonne partout. */
+@media (max-width: 560px){
+    .watch{
+        flex-basis: 100%;          /* les cartes du catalogue prennent toute la largeur */
+    }
+    .form-grid{
+        grid-template-columns: 1fr;    /* le formulaire admin passe en 1 colonne */
+    }
+    .admin-toolbar{
+        flex-wrap: wrap;               /* filtre + bouton s'empilent */
+    }
+    .admin-table-wrap{
+        overflow-x: auto;              /* le tableau peut défiler horizontalement */
+    }
+    .head{
+        padding-top: 2rem;
+    }
 }
 
