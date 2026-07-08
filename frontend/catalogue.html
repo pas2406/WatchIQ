@@ -40,15 +40,15 @@
                 </form>
 
                 <div class="filter">
-                    <a href="#">Toutes</a>
-                    <a href="#">Rolex</a>
-                    <a href="#">Omega</a>
-                    <a href="#">Patek phillipe</a>
-                    <a href="#">Vacheron constantin</a>
-                    <a href="#">Audemars</a>
-
-
-
+                    <!-- Menu déroulant personnalisé (les marques sont ajoutées par app.js) -->
+                    <div class="dropdown" id="brand-dropdown">
+                        <button type="button" class="dropdown-toggle" id="brand-toggle">
+                            Toutes les marques
+                        </button>
+                        <ul class="dropdown-menu" id="brand-menu">
+                            <li class="dropdown-option selected" data-value="">Toutes les marques</li>
+                        </ul>
+                    </div>
                 </div>
 
             </div>

@@ -116,6 +116,9 @@ function setupSearch() {
         event.preventDefault();                     // empêche le rechargement de la page
         const q = input.value.trim();
 
+        // Cohérence : lancer une recherche réinitialise le filtre marque.
+        resetBrandSelection();
+
         // Champ vide -> on réaffiche tout le catalogue.
         if (q === "") {
             fetchAndRender("/watch/");
@@ -127,9 +130,99 @@ function setupSearch() {
 }
 
 
+// ── Remplit la liste des marques (générée depuis l'API) ───────────────────────
+async function populateBrands() {
+    const menu = document.querySelector("#brand-menu");
+    if (!menu) return;
+
+    try {
+        const response = await fetch(`${API_URL}/watch/`, {
+            headers: { Accept: "application/json" },
+        });
+        const watches = await response.json();
+
+        // new Set(...) supprime les doublons : chaque marque n'apparaît qu'une fois.
+        const brands = [...new Set(watches.map((w) => w.brand))].sort();
+
+        for (const brand of brands) {
+            const li = document.createElement("li");
+            li.className = "dropdown-option";
+            li.dataset.value = brand;        // la valeur envoyée à l'API
+            li.textContent = brand;          // le texte affiché
+            menu.append(li);
+        }
+    } catch (error) {
+        console.error("Impossible de charger les marques", error);
+    }
+}
+
+
+// ── Applique le choix d'une marque (affichage + requête API) ──────────────────
+function selectBrand(value, label) {
+    const toggle = document.querySelector("#brand-toggle");
+    const searchInput = document.querySelector("#search-input");
+
+    toggle.textContent = label;              // le bouton affiche la marque choisie
+
+    // On surligne l'option choisie dans la liste.
+    document.querySelectorAll(".dropdown-option").forEach((option) =>
+        option.classList.toggle("selected", option.dataset.value === value)
+    );
+
+    if (searchInput) searchInput.value = ""; // cohérence : efface la recherche
+
+    if (value === "") {
+        fetchAndRender("/watch/");           // "Toutes les marques"
+    } else {
+        fetchAndRender(`/watch/?brand=${encodeURIComponent(value)}`);
+    }
+}
+
+
+// ── Remet le filtre marque à zéro (utilisé quand on lance une recherche) ──────
+function resetBrandSelection() {
+    const toggle = document.querySelector("#brand-toggle");
+    if (toggle) toggle.textContent = "Toutes les marques";
+
+    document.querySelectorAll(".dropdown-option").forEach((option) =>
+        option.classList.toggle("selected", option.dataset.value === "")
+    );
+}
+
+
+// ── Branche le menu déroulant personnalisé ────────────────────────────────────
+function setupBrandFilter() {
+    const dropdown = document.querySelector("#brand-dropdown");
+    const toggle = document.querySelector("#brand-toggle");
+    const menu = document.querySelector("#brand-menu");
+    if (!dropdown) return;
+
+    // Clic sur le bouton -> ouvre/ferme la liste.
+    toggle.addEventListener("click", (event) => {
+        event.stopPropagation();             // empêche le "clic ailleurs" de refermer aussitôt
+        menu.classList.toggle("open");
+    });
+
+    // Clic sur une marque (délégation : un seul écouteur sur toute la liste).
+    menu.addEventListener("click", (event) => {
+        const option = event.target.closest(".dropdown-option");
+        if (!option) return;
+        selectBrand(option.dataset.value, option.textContent.trim());
+        menu.classList.remove("open");       // referme après le choix
+    });
+
+    // Clic n'importe où ailleurs dans la page -> referme le menu.
+    document.addEventListener("click", (event) => {
+        if (!dropdown.contains(event.target)) menu.classList.remove("open");
+    });
+}
+
+
 // ── Démarrage (defer garantit que le HTML est prêt) ───────────────────────────
 // On ne lance rien si on n'est pas sur la page catalogue.
 if (document.querySelector("#watch-list")) {
     setupSearch();
+    setupBrandFilter();
+    populateBrands();
     fetchAndRender("/watch/");
 }
