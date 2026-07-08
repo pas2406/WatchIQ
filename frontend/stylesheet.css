@@ -425,12 +425,42 @@ a{
 }
 
 
-.admin-table{
-    background:rgb(6, 25, 45) ;
+/* Colonne de droite de l'admin : le champ de filtre + le tableau */
+.admin-panel{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* La boîte qui défile : hauteur limitée + scroll interne */
+.admin-table-wrap{
+    max-height: 65vh;
+    overflow-y: auto;
+    background: rgb(6, 25, 45);
     border: solid 1px gray;
     border-radius: 1rem;
-    padding: 20px;
-    flex: 1;
+    padding: 0 20px 16px;
+}
+
+.admin-table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* En-tête collant : reste visible pendant qu'on fait défiler */
+.admin-table thead th{
+    position: sticky;
+    top: 0;
+    background: rgb(6, 25, 45);   /* couvre les lignes qui passent dessous */
+    text-align: left;
+    padding: 16px 8px 12px;
+    z-index: 1;
+}
+
+.admin-table td{
+    padding: 12px 8px;
+    border-bottom: 1px solid rgb(2, 37, 74);
 }
 
 .marque{
@@ -548,5 +578,72 @@ a{
     padding: 3rem 0;
     font-size: 20px;
     color: gray;
+}
+
+
+/* Messages de retour du formulaire admin */
+.form-message-ok{
+    color: #6fcf97;
+    padding-top: 12px;
+}
+
+.form-message-error{
+    color: #e57373;
+    padding-top: 12px;
+}
+
+
+/* ── Fenêtre modale de confirmation ────────────────────────────────────────── */
+/* Voile qui recouvre tout l'écran et centre la boîte */
+.modal-overlay{
+    position: fixed;
+    inset: 0;                                  /* top/right/bottom/left = 0 */
+    background: rgba(0, 0, 0, 0.6);
+    display: none;                             /* caché par défaut */
+    align-items: center;                      /* centrage vertical */
+    justify-content: center;                  /* centrage horizontal */
+    z-index: 1000;
+}
+
+.modal-overlay.open{
+    display: flex;                            /* affiché (classe ajoutée en JS) */
+}
+
+.modal{
+    width: 90%;
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
+    background: rgb(6, 25, 45);
+    border: 1px solid rgba(187, 142, 65, 0.914);
+    border-radius: 1rem;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-text{
+    color: #dddddd;
+    font-size: 18px;
+    margin-bottom: 1.6rem;
+}
+
+.modal-actions{
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Bouton secondaire (contour), pour "Annuler" */
+.btn-ghost{
+    padding: 9px 18px;
+    color: gray;
+    background: transparent;
+    border: 1px solid gray;
+    border-radius: 100px;
+    cursor: pointer;
+}
+
+.btn-ghost:hover{
+    color: rgba(187, 142, 65, 0.914);
+    border-color: rgba(187, 142, 65, 0.914);
 }
 

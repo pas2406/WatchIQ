@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration</title>
     <link rel="stylesheet" href="stylesheet.css">
+    <script src="./admin.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -33,16 +34,16 @@
 
             <div class="inventaire">
                 <div class="box">
-                    <div class="gold">9</div>
+                    <div class="gold" id="stat-count">—</div>
                     <div>MONTRES AU CATALOGUE</div>
                 </div>
                 <div class="box">
-                    <div class="gold">25</div>
+                    <div class="gold" id="stat-brands">—</div>
                     <div>MARQUES</div>
                 </div>
                 <div class="box">
-                    <div class="gold">25</div>
-                    <div>MARQUES</div>
+                    <div class="gold" id="stat-available">—</div>
+                    <div>DISPONIBLES</div>
                 </div>
             </div>
 
@@ -51,7 +52,7 @@
         <div class="admin">
 
             <div class="form">
-                <form action="admin.html">
+                <form id="create-form">
                     <div class="form-watch">
                         <label for="brandinput">Marque</label>
                         <input class="input-form" type="text" name="Marque" id="brandinput">
@@ -70,12 +71,12 @@
                     <div class="form-double">
                         <div>
                                 <label for="prixinput">Prix</label>
-                                <input class="input-form" type="numeric" name="prix" id="prixinput"> 
+                                <input class="input-form" type="number" name="prix" id="prixinput">
                         </div>
 
                         <div>
                                 <label for="diametre-input">Diamétre</label>
-                                <input class="input-form" type="numeric" name="diametre" id="diametre-input"> 
+                                <input class="input-form" type="number" name="diametre" id="diametre-input">
                         </div>
 
                     </div>
@@ -99,102 +100,51 @@
                     </div>
 
                     <div>
-                        <button  class="btn-fill">AJOUTER LA MONTRE</button>
+                        <button id="create-btn"  class="btn-fill">AJOUTER LA MONTRE</button>
                     </div>
+
+                    <!-- message de retour (succès / erreur) rempli par admin.js -->
+                    <p id="form-message"></p>
 
 
                 </form>
 
             </div>
 
-            <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Montre</th>
-                    <th>Référence</th>
-                    <th>Prix</th>
-                    <th></th> 
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <div class="marque">Rolex</div>
-                      <div class="modele">Submariner Date</div>
-                    </td>
-                    <td>126610LN</td>
-                    <td>$ 10 900</td>
-                    <td>
-                      <button class="btn-fill">Modifier</button>
-                      <button class="btn-fill">Supprimer</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="marque">omega</div>
-                      <div class="modele">Speedmaster</div>
-                    </td>
-                    <td>126610LN</td>
-                    <td>$ 10 900</td>
-                    <td>
-                      <button  class="btn-fill">Modifier</button>
-                      <button  class="btn-fill" >Supprimer</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="marque">Patek philipe</div>
-                      <div class="modele">Nautilus</div>
-                    </td>
-                    <td>126610LN</td>
-                    <td>$ 10 900</td>
-                    <td>
-                      <button  class="btn-fill">Modifier</button>
-                      <button  class="btn-fill">Supprimer</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="marque">cartier</div>
-                      <div class="modele">Tank</div>
-                    </td>
-                    <td>126610LN</td>
-                    <td>$ 10 900</td>
-                    <td>
-                      <button  class="btn-fill">Modifier</button>
-                      <button  class="btn-fill">Supprimer</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="marque">tudor</div>
-                      <div class="modele">Black bay58</div>
-                    </td>
-                    <td>126610LN</td>
-                    <td>$ 10 900</td>
-                    <td>
-                      <button  class="btn-fill">Modifier</button>
-                      <button  class="btn-fill">Supprimer</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="marque">Rolex</div>
-                      <div class="modele">Daytona</div>
-                    </td>
-                    <td>126610LN</td>
-                    <td>$ 10 900</td>
-                    <td>
-                      <button class="btn-fill">Modifier</button>
-                      <button class="btn-fill">Supprimer</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="admin-panel">
+                <input class="input-form" type="text" id="admin-search"
+                       placeholder="Filtrer par marque ou modèle…">
+
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Montre</th>
+                            <th>Référence</th>
+                            <th>Prix</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <!-- Les lignes sont ajoutées dynamiquement par admin.js -->
+                        <tbody id="admin-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
              
 
         </div>
     </div>
-    
+
+    <!-- Fenêtre de confirmation, centrée et cachée par défaut (pilotée par admin.js) -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal">
+            <p class="modal-text" id="confirm-text">Confirmer ?</p>
+            <div class="modal-actions">
+                <button class="btn-ghost" id="confirm-cancel">Annuler</button>
+                <button class="btn-fill" id="confirm-ok">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
