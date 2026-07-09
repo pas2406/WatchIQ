@@ -18,6 +18,12 @@ def list_watches(
     category:  Optional[str]   = Query(None),
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
+    # ── Pagination (opt-in) ───────────────────────────────────────────────────
+    # limit = combien de montres renvoyer ; offset = combien en sauter (à partir
+    # de quelle position). Si limit est None, on renvoie TOUT comme avant : ça
+    # évite de casser admin/versus/accueil qui attendent la liste complète.
+    limit:     Optional[int]   = Query(None, ge=1, le=100),
+    offset:    int             = Query(0, ge=0),
     db: Session = Depends(get_db),
 ):
     """
@@ -36,6 +42,11 @@ def list_watches(
     if max_price is not None:
         stmt = stmt.where(Watch.retail_price <= max_price)
 
+    # On pagine SEULEMENT si le client a demandé un limit. .offset(n).limit(m)
+    # se traduit en SQL par « OFFSET n LIMIT m » : la base ne renvoie qu'une tranche.
+    if limit is not None:
+        stmt = stmt.order_by(Watch.id).offset(offset).limit(limit)
+
     # scalars(...).all() renvoie une liste d'objets Watch (pas des tuples).
     return db.scalars(stmt).all()
 
@@ -43,7 +54,12 @@ def list_watches(
 # ── Rechercher ────────────────────────────────────────────────────────────────
 
 @router.get("/search", response_model=List[WatchOut])
-def search_watches(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+def search_watches(
+    q: str = Query(..., min_length=1),
+    limit:  Optional[int] = Query(None, ge=1, le=100),
+    offset: int           = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
     """Recherche plein-texte sur brand, model, dial_color (or_ = OU logique)."""
     term = f"%{q}%"
     stmt = select(Watch).where(
@@ -53,6 +69,24 @@ def search_watches(q: str = Query(..., min_length=1), db: Session = Depends(get_
             Watch.dial_color.ilike(term),
         )
     )
+    if limit is not None:
+        stmt = stmt.order_by(Watch.id).offset(offset).limit(limit)
+    return db.scalars(stmt).all()
+
+
+# ── Lister les marques (léger : juste des noms, pas les 504 montres) ───────────
+
+@router.get("/brands", response_model=List[str])
+def list_brands(db: Session = Depends(get_db)):
+    """
+    Renvoie la liste des marques distinctes, triées. C'est BEAUCOUP plus léger que
+    de télécharger toutes les montres juste pour en extraire les marques côté front.
+    select(Watch.brand).distinct() = « SELECT DISTINCT brand FROM watches ».
+
+    ⚠️ Doit être déclaré AVANT la route /{watch_id}, sinon FastAPI croirait que
+    « brands » est un id de montre (et renverrait une erreur).
+    """
+    stmt = select(Watch.brand).distinct().order_by(Watch.brand)
     return db.scalars(stmt).all()
 
 

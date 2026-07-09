@@ -34,6 +34,7 @@ function createWatchCard(watch) {
     const img = el("img", "watch-img");
     img.src = watch.image_url || PLACEHOLDER_IMG;
     img.alt = `${watch.brand} ${watch.model}`;
+    img.loading = "lazy";        // le navigateur ne charge l'image que si elle approche de l'écran
     article.append(img);
 
     // Corps de la carte
@@ -64,43 +65,92 @@ function createWatchCard(watch) {
 }
 
 
-// ── Affiche une liste de montres déjà récupérée ───────────────────────────────
-function renderWatches(watches) {
-    const list = document.querySelector("#watch-list");
+// ── Pagination ────────────────────────────────────────────────────────────────
+// On ne télécharge plus les 504 montres d'un coup : on demande des « pages » de
+// PAGE_SIZE montres à l'API, et le bouton « Charger plus » demande la suivante.
+const PAGE_SIZE = 24;
+
+let currentPath = "/watch/";   // la requête en cours SANS limit/offset
+let currentOffset = 0;         // où on en est (combien de montres déjà chargées)
+let loadedCount = 0;           // nombre total de montres actuellement affichées
+let reachedEnd = false;        // vrai quand l'API a renvoyé une page incomplète
+
+// Ajoute limit/offset à un chemin, en gérant le "?" déjà présent (ex. ?brand=Rolex).
+function pagedUrl(path, offset) {
+    const sep = path.includes("?") ? "&" : "?";
+    return `${API_URL}${path}${sep}limit=${PAGE_SIZE}&offset=${offset}`;
+}
+
+// Met à jour le compteur et l'état du bouton « Charger plus ».
+function updateUI() {
     const quantity = document.querySelector("#quantity");
+    const btn = document.querySelector("#load-more");
 
-    list.innerHTML = "";                            // on vide l'affichage précédent
-
-    if (watches.length === 0) {
+    if (loadedCount === 0) {
         quantity.textContent = "Aucune montre trouvée";
-        return;
+    } else {
+        // On n'affiche "+" que s'il reste potentiellement des montres à charger.
+        quantity.textContent = reachedEnd ? `${loadedCount} montres`
+                                          : `${loadedCount}+ montres`;
     }
 
-    quantity.textContent = `${watches.length} montres`;
-    for (const watch of watches) {
-        list.append(createWatchCard(watch));
+    if (btn) {
+        btn.hidden = reachedEnd || loadedCount === 0;
+        btn.textContent = "Voir plus de montres";
+        btn.disabled = false;
     }
 }
 
-
-// ── Récupère des montres depuis l'API puis les affiche ────────────────────────
-// `path` = la fin de l'URL, ex. "/watch/" ou "/watch/search?q=rolex".
-async function fetchAndRender(path) {
+// Charge UNE page depuis l'API. append=false => nouvelle recherche (on vide) ;
+// append=true => on ajoute à la suite (clic sur « Charger plus »).
+async function loadPage(append) {
+    const list = document.querySelector("#watch-list");
     const quantity = document.querySelector("#quantity");
-    quantity.textContent = "Chargement…";
+    const btn = document.querySelector("#load-more");
+
+    if (!append) quantity.textContent = "Chargement…";
+    if (btn && append) { btn.textContent = "Chargement…"; btn.disabled = true; }
 
     try {
-        const response = await fetch(`${API_URL}${path}`, {
+        const response = await fetch(pagedUrl(currentPath, currentOffset), {
             headers: { Accept: "application/json" },
         });
         if (!response.ok) throw new Error("Erreur serveur");
 
         const watches = await response.json();
-        renderWatches(watches);
+
+        if (!append) { list.innerHTML = ""; loadedCount = 0; }
+
+        for (const watch of watches) list.append(createWatchCard(watch));
+
+        loadedCount   += watches.length;
+        currentOffset += watches.length;
+        // Une page incomplète (< PAGE_SIZE) signifie qu'il n'y a plus rien après.
+        reachedEnd = watches.length < PAGE_SIZE;
+
+        updateUI();
     } catch (error) {
         quantity.textContent = "Impossible de charger le catalogue 😕";
+        if (btn) { btn.textContent = "Réessayer"; btn.disabled = false; }
         console.error(error);
     }
+}
+
+// Démarre une NOUVELLE requête (remet la pagination à zéro).
+// `path` = ex. "/watch/", "/watch/?brand=Rolex", "/watch/search?q=rolex".
+function fetchAndRender(path) {
+    currentPath = path;
+    currentOffset = 0;
+    loadedCount = 0;
+    reachedEnd = false;
+    loadPage(false);
+}
+
+// Branche le bouton « Charger plus » (clic => page suivante, ajoutée à la suite).
+function setupLoadMore() {
+    const btn = document.querySelector("#load-more");
+    if (!btn) return;
+    btn.addEventListener("click", () => loadPage(true));
 }
 
 
@@ -135,13 +185,12 @@ async function populateBrands() {
     if (!menu) return;
 
     try {
-        const response = await fetch(`${API_URL}/watch/`, {
+        // Point d'API léger : renvoie SEULEMENT les noms de marques (distincts, triés),
+        // pas les 504 montres. Avant, on téléchargeait tout le catalogue une 2ᵉ fois ici !
+        const response = await fetch(`${API_URL}/watch/brands`, {
             headers: { Accept: "application/json" },
         });
-        const watches = await response.json();
-
-        // new Set(...) supprime les doublons : chaque marque n'apparaît qu'une fois.
-        const brands = [...new Set(watches.map((w) => w.brand))].sort();
+        const brands = await response.json();
 
         for (const brand of brands) {
             const li = document.createElement("li");
@@ -222,6 +271,7 @@ function setupBrandFilter() {
 if (document.querySelector("#watch-list")) {
     setupSearch();
     setupBrandFilter();
+    setupLoadMore();
     populateBrands();
     fetchAndRender("/watch/");
 }
