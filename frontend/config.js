@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const API_BASE_LOCAL = "http://127.0.0.1:8000";
-const API_BASE_PROD  = "https://REMPLACER-PAR-URL-RENDER.onrender.com";
+const API_BASE_PROD  = "https://watchiq.onrender.com";
 
 const API_URL =
     (location.hostname === "localhost" || location.hostname === "127.0.0.1")
